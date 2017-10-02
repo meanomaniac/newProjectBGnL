@@ -1,0 +1,29 @@
+maintained peak algo:
+The following is assuming the peak has been reached. Will need to consider if it hasn't been reached separately.
+1) once you see a change of more than a certain percent (like 40%: var 1) in a duration (lets call this first duration),
+  get the note the price at both points (lowPrice, highPrice). Then wait for one hour
+1.1) After an hour, get the average price of this coin in the last one hour.
+  If this average is more than a certain percent (like 50%) of the coin price 1 hour ago (i.e. at the end of the last interval),
+  then proceed to next. Also at this point trigger a road block. The road block logic is for the program to ignore looking for
+    changes/peaks in the above first interval more than once which may be triggered because the price change in the next interval
+    may also be significant. So if the start point of a duration (like the one that is double that of the first duration) will lie
+    within the first duration ignore it.
+2) get max recordTime with price less than (the lowPrice + a certain percent(like 10% of var 1 = 4 %)).
+  Ensure using where clause that this recordTime is greater than the record Time
+  of the beginning of this first time duration but less that the end of the first time Duration.
+  a) If this point (pt X) is not the same as the beginning point of the first duration then pt X is the base of the peak
+  and we shall call it Pt. A
+  b) If this point is the same as the beginning of this first duration then its possible that you haven't reached the base.
+  In this case, get the difference of the price between this lowPrice point and 15 mins ago - say Pt. Y (you can do this by
+  using a sql similar to the one that you use to get the gainers and losers. You can get the min and max times
+  in this time range for this coin and then use join to get the prices at these points). If Pt. Y is greater than
+  say 95% of the lowPice then lowPrice is indeed the base, if not continue this until you get a Pt. Y that matches this criteria.
+  When you do, the higher end time of that 15 min interval is the base point of the peak - Pt. A
+3) get the min recordTime with price = highPrice. Ensure using where clause that this recordTime
+  is greater than the record Time of the beginning of this time duration but less that the end of the time Duration.
+  Repeat the procedure similar to step 2) to get the peak point ( This is highPoint (Pt. B)). Don't go any higher than say
+  15 min intervals as you may get incorrect data because of the onset of another peak.
+4) Get difference of recordTimes between Pt A and Pt B. This is timeToPeak.
+5) use 15 min time intervals like in steps 2 and 3 to get the max record time which has a price point that is either less
+than say 110% of the Pt B and greater than say 60% of pt. B. This is Pt. C.
+6) Get difference of recordTimes between Pt B and Pt C. This is the peak maintain time.

@@ -1,3 +1,4 @@
+Overview:
 1) get the MAXs (pt. A) using the sql for the following times. Besides being triggered hourly (time variable type 1) this will also
 calculate for those records that already exist in the DB.
 depend on how much time it takes to you can afford to wait after the 1st peak to initiate a buy (definitely less than )
