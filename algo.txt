@@ -1,0 +1,34 @@
+1) get the MAXs (pt. A) using the sql for the following times. Besides being triggered hourly (time variable type 1) this will also
+calculate for those records that already exist in the DB.
+depend on how much time it takes to you can afford to wait after the 1st peak to initiate a buy (definitely less than )
+
+1 hr, 2 hr, 4 hr, 8 hr, 12 hr, 24 hr
+2 day, 4 day, 1 wk, 2 wk, 4 wk
+
+The time durations that are listed below (Time variable type 2)
+are experimental (for testing) as of now, but when the winning pattern is determined, there would be fewer intervals, that will
+be determined by the minimum amount of time taken for a peak (30 mins as of now), and the maximum time taken (150 mins) as of now.
+If the min is 30 mins and the max is 150, then the intervals would be double of them - so 1 hour and 5 hours; and you can have
+2, 3, 4 hours in between, You may not need the day and week intervals for knowing when to initiate a buy (but maybe needed to initiate
+a buy). The logic behind doubling is that in the worst case you may miss a peak if the last duration ended at half way of a peak;
+in which case you may miss the the fact that this was a peak even in the next interval. But in an interval that is double, you
+won't miss the peak.
+
+The time intervals at which these durations need to be initiated (Time variable type 1) will be determined by how much time you
+can afford to wait after a peak (assuming the worst case is that you may have missed knowing a peak at the very end of the
+last interval). You very likely have to first make sure that this peak is stable for a while (2 hours for e.g.). So your interval
+could be slightly less than 2 hours. Regardless every 1 hour - seems to be a good interval.
+
+2) Use an algorithm for peaks and dips (like change of 50% or more in a certain span of time like 90 mins).
+3) Use an algorithm to determine the maintain Time of the peak/dip (like change in avg. price in that time is within 10%)
+4) Record the time gap between the first peak/dip before the time of max (pt. A). Also record the maintain time for this peak.
+Record it only if the maintain time is more than a certain time like at-least a few minutes.
+Repeat this for the second peak before the max and so on.
+peak/dip.
+5) Repeat the above step for time after the max also.
+4) To determine a pattern calculate the median of 2 things (for either side of the max)
+          a) median time gap between the max and 1st peak, 2nd peak, etc.
+          b) The maintain time of the 1st peak, 2nd peak, etc.
+
+
+Repeat the above for mins to possibly determine the pattern for min also

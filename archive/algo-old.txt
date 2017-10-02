@@ -1,0 +1,36 @@
+Following describes the 1 hour GnL, will be similar for other time permutations:
+1) Start with the record from the first available time
+2) Get all records from DB and keep going until the recordTime is more than an hour
+3) Capture all pairs you encounter (ensure they are separate for each exchange),
+  and create a property for each new pair which has an object as its value
+4) the first time you encounter a pair add the initialPrice property for the pair, Keep setting the finalPrice property every other time
+5) At the end of it all, calculate the difference between the initialPrice and the finalPrice and save it as the 3rd property
+6) Find all that are above the threshold for that window (1hr) and populate the 1 hr column, rank and the end time
+  as many as there are, no limit to how many ranks
+
+
+If for the end time, a 2 hour window exists, repeat the same process for 2 hours and so on for all other times noted as columns in
+the DB
+
+From the DB maybe limit the records to 100 for each DB call for populating the pair object mentioned above
+
+Create a table with:
+time (the end time in the process followed above)
+Rank
+1 hr
+2 hr
+4 hr
+8 hr
+12 hr
+24 hr
+2 day
+4 day
+1 wk
+2 wk
+4 wk
+
+Each of the duration columns will have a string value that is a concatenation of (with delimited by colon(s)):
+  a) currencyName::
+  b) priceChange::
+  c) short-form-name of the exchange with the maximum open orders for that pair at the end time :
+      amount open for buying in 1000s
