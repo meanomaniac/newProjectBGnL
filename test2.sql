@@ -1,16 +1,15 @@
 	use pocu3;
     
-    SELECT exchangeName, tradePair, avg(askPriceUSD) as avgPriceUSD, (recordTime div 1500) as timeRecorded  from cTicker
-    where ( recordTime > '2017-10-21 20:00:00' and recordTime < '2017-10-21 20:30:00'  and exchangeName != 'coinMarketCap') 
-    GROUP BY tradePair, recordTime div 1500 ORDER BY timeRecorded, tradePair;
-    
-    SELECT distinct(recordTime div 1500) from cTicker where recordTime > '2017-10-01 20:19:10' and recordTime < '2017-10-01 20:34:10';
-    
-    
-    	
-    SELECT exchangeName, tradePair, avg(askPriceUSD) as avgPriceUSD from cTicker 
-    where ( recordTime > (SELECT (CURRENT_TIMESTAMP -1500)) and recordTime < (SELECT (CURRENT_TIMESTAMP)) 
-    and exchangeName != 'coinMarketCap') 
-    GROUP BY tradePair ORDER BY avgPriceUSD;
+    SELECT exchangeName, tradePair, avg(askPriceUSD) as avgPriceUSD, FROM_UNIXTIME((UNIX_TIMESTAMP(recordTime)) div 900*900 + 900) as timeRecorded
+    from cTicker
+    where ( recordTime > '2017-10-21 19:00:00' and recordTime < '2017-10-21 20:30:00'  and exchangeName != 'coinMarketCap') 
+    GROUP BY tradePair, recordTime div 1500 ORDER BY recordTime, tradePair;
 
-select * from cTicker where tradePair='ACOIN/BTC' and (recordTime div 1500) = '13447347467';
+CREATE TABLE cTicker15MinAvg (
+	exchangeName VARCHAR(15) NULL,
+	tradePair VARCHAR(20) NULL,
+	askPriceUSD FLOAT NULL,
+	recordTime DATETIME NULL
+);
+
+select * from cTicker where tradePair='BTC-EGC' and  ( recordTime > '2017-10-21 19:00:00' and recordTime < '2017-10-21 20:30:00'  and exchangeName != 'coinMarketCap') ;

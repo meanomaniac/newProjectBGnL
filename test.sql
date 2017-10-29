@@ -22,7 +22,7 @@ SELECT vMinMaxTime.exchangeName, vMinMaxTime.tradePair, vMinMaxTime.endTime,
 ROUND(((cTickerEndPrice.askPriceUSD - cTickerStartPrice.askPriceUSD)/ cTickerStartPrice.askPriceUSD*100), 2) as priceChangePercent
 FROM (
 	SELECT exchangeName, tradePair, min(recordTime) as startTime, max(recordTime) as endTime from cTicker 
-    where ( recordTime > '2017-10-01 19:00:10' and recordTime < '2017-10-01 20:00:10'  and exchangeName != 'coinMarketCap') 
+    where ( recordTime > '2017-10-01 19:34:10' and recordTime < '2017-10-01 20:34:10'  and exchangeName != 'coinMarketCap') 
     GROUP BY tradePair
 
 ) vMinMaxTime
@@ -38,3 +38,5 @@ OR (cTickerEndPrice.askPriceUSD - cTickerStartPrice.askPriceUSD)/ cTickerStartPr
 -- AND (cTickerEndPrice.askPriceUSD - cTickerStartPrice.askPriceUSD)/ cTickerStartPrice.askPriceUSD*100 < 12000000000000
 -- GROUP BY cTickerStartPrice.tradePair
 ORDER BY priceChangePercent DESC;
+
+select * from cTicker where tradePair='ACOIN/BTC' and (recordTime div 1500) = '13447347467';
