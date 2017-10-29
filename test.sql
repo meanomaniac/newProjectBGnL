@@ -39,4 +39,4 @@ OR (cTickerEndPrice.askPriceUSD - cTickerStartPrice.askPriceUSD)/ cTickerStartPr
 -- GROUP BY cTickerStartPrice.tradePair
 ORDER BY priceChangePercent DESC;
 
-select * from cTicker where tradePair='ACOIN/BTC' and (recordTime div 1500) = '13447347467';
+select * from cTicker where tradePair='BTC-EGC' and  ( recordTime > '2017-10-21 19:00:00' and recordTime < '2017-10-21 20:30:00'  and exchangeName != 'coinMarketCap') ;
