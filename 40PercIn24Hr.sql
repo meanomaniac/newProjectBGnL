@@ -243,10 +243,32 @@ cTicker24HrMaxFinalPlus60 cTicker24HrFinalTemp ON (cTicker24HrFinalTemp.exchange
 																	AND cTicker24HrFinalTemp.recordDay = cTicker24HrMaxFinalTemp.recordDay);      
                                                  
 ALTER TABLE cTicker24HrMinMaxPlus60 ADD INDEX exchangePair (exchangeName, tradePair, recordDay);
+
+CREATE TABLE cTicker24HrMinMaxPlus60NoNull LIKE cTicker24HrMinMaxPlus60; 
+INSERT cTicker24HrMinMaxPlus60NoNull SELECT * FROM cTicker24HrMinMaxPlus60;
+
+UPDATE cTicker24HrMinMaxPlus60NoNull SET priceUSDMaxPlus15 = maxPriceUSD where priceUSDMaxPlus15 IS NULL;
+UPDATE cTicker24HrMinMaxPlus60NoNull SET priceUSDMaxPlus30 = priceUSDMaxPlus15 where priceUSDMaxPlus30 IS NULL;
+UPDATE cTicker24HrMinMaxPlus60NoNull SET priceUSDMaxPlus45 = priceUSDMaxPlus30 where priceUSDMaxPlus45 IS NULL;
+UPDATE cTicker24HrMinMaxPlus60NoNull SET priceUSDMaxPlus60 = priceUSDMaxPlus45 where priceUSDMaxPlus60 IS NULL;
+use pocu3;
 -- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
--- TEST 														
+-- TEST 
+
+SELECT * FROM cTicker24HrMinMaxPlus60NoNull where recordDay < '2017-10-02 03:00:00';														
+SELECT count(*) from cTicker24HrMinMaxPlus60NoNull ;
+SELECT count(*) from cTicker24HrMinMaxPlus60NoNull where priceUSDMaxPlus30 IS NULL;
+SELECT count(*) from cTicker24HrMinMaxPlus60NoNull where timeOfMax > timeOfMin AND (maxPriceUSD-minPriceUSD)/minPriceUSD > 1
+AND (priceUSDMaxPlus15+priceUSDMaxPlus30+priceUSDMaxPlus45+priceUSDMaxPlus60)/4 > 0.5*maxPriceUSD 
+AND exchangeName != 'coinMarketCap';
+
+
+
+SELECT * FROM cTicker24HrMinMaxPlus60 where recordDay < '2017-10-02 03:00:00';														
 SELECT count(*) from cTicker24HrMinMaxPlus60 ;
+SELECT count(*) from cTicker24HrMinMaxPlus60 where priceUSDMaxPlus45 IS NULL;
+
 SELECT count(*) from cTicker24HrMinMaxPlus60 where timeOfMax > timeOfMin and (maxPriceUSD-minPriceUSD)/minPriceUSD > 1;
 
 SELECT count(*) from cTicker24HrMinMaxPlus60 where ((timeOfMax > timeOfMin) AND ((maxPriceUSD-minPriceUSD)/minPriceUSD > 1)
