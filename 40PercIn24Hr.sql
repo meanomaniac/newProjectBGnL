@@ -134,6 +134,13 @@ ALTER TABLE cTicker24HrMinMax ADD INDEX exchangePair (exchangeName, tradePair, r
 
 -- TEST 														
 SELECT count(*) from cTicker24HrMinMax ;
+SELECT count(*) from cTicker24HrMinMax where timeOfMax > timeOfMin and (maxPriceUSD-minPriceUSD)/minPriceUSD > 1;
+
+
+
+
+
+-- del 
 select * from cTicker24HrMinMax where recordDay < '2017-10-02 03:00:00';
 select * from cTicker24HrMin where recordDay < '2017-10-02 03:00:00';
 select * from cTicker24HrMax where recordDay < '2017-10-02 03:00:00';
