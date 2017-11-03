@@ -138,6 +138,118 @@ LEFT JOIN cTicker15MinAvg cTicker15MinAvgTemp ON ( cTicker15MinAvgTemp.exchangeN
 ALTER TABLE cTicker24HrMaxFinalPlus60 ADD INDEX exchangePair (exchangeName, tradePair, recordDay);
 
 
+CREATE TABLE cTicker24HrMaxFinalPlus60Minus15 (
+	exchangeName VARCHAR(15) NULL,
+	tradePair VARCHAR(20) NULL,
+	recordDay DATE NULL,
+	maxPriceUSD FLOAT NULL,
+    timeOfMax DATETIME NULL,
+    priceUSDMinus15 FLOAT NULL,
+	priceUSDPlus15 FLOAT NULL,
+    priceUSDPlus30 FLOAT NULL,
+    priceUSDPlus45 FLOAT NULL,
+	priceUSDPlus60 FLOAT NULL
+);
+
+INSERT into cTicker24HrMaxFinalPlus60Minus15
+SELECT cTicker24HrMaxFinalTemp.exchangeName, cTicker24HrMaxFinalTemp.tradePair, cTicker24HrMaxFinalTemp.recordDay, 
+cTicker24HrMaxFinalTemp.maxPriceUSD, cTicker24HrMaxFinalTemp.timeOfMax, cTicker15MinAvgTemp.askPriceUSD,
+cTicker24HrMaxFinalTemp.priceUSDPlus15, cTicker24HrMaxFinalTemp.priceUSDPlus30, cTicker24HrMaxFinalTemp.priceUSDPlus45,
+cTicker24HrMaxFinalTemp.priceUSDPlus60
+from cTicker24HrMaxFinalPlus60 AS cTicker24HrMaxFinalTemp
+LEFT JOIN cTicker15MinAvg cTicker15MinAvgTemp ON ( cTicker15MinAvgTemp.exchangeName = cTicker24HrMaxFinalTemp.exchangeName
+																							AND cTicker15MinAvgTemp.tradePair = cTicker24HrMaxFinalTemp.tradePair
+																							AND FROM_UNIXTIME((UNIX_TIMESTAMP(recordTime)) +900) = cTicker24HrMaxFinalTemp.timeOfMax);                                                                                           
+
+ALTER TABLE cTicker24HrMaxFinalPlus60Minus15 ADD INDEX exchangePair (exchangeName, tradePair, recordDay);
+
+
+CREATE TABLE cTicker24HrMaxFinalPlus60Minus30 (
+	exchangeName VARCHAR(15) NULL,
+	tradePair VARCHAR(20) NULL,
+	recordDay DATE NULL,
+	maxPriceUSD FLOAT NULL,
+    timeOfMax DATETIME NULL,
+	priceUSDMinus30 FLOAT NULL,
+    priceUSDMinus15 FLOAT NULL,
+	priceUSDPlus15 FLOAT NULL,
+    priceUSDPlus30 FLOAT NULL,
+    priceUSDPlus45 FLOAT NULL,
+	priceUSDPlus60 FLOAT NULL
+);
+
+INSERT into cTicker24HrMaxFinalPlus60Minus30
+SELECT cTicker24HrMaxFinalTemp.exchangeName, cTicker24HrMaxFinalTemp.tradePair, cTicker24HrMaxFinalTemp.recordDay, 
+cTicker24HrMaxFinalTemp.maxPriceUSD, cTicker24HrMaxFinalTemp.timeOfMax, cTicker15MinAvgTemp.askPriceUSD,
+cTicker24HrMaxFinalTemp.priceUSDMinus15,
+cTicker24HrMaxFinalTemp.priceUSDPlus15, cTicker24HrMaxFinalTemp.priceUSDPlus30, cTicker24HrMaxFinalTemp.priceUSDPlus45,
+cTicker24HrMaxFinalTemp.priceUSDPlus60
+from cTicker24HrMaxFinalPlus60Minus15 AS cTicker24HrMaxFinalTemp
+LEFT JOIN cTicker15MinAvg cTicker15MinAvgTemp ON ( cTicker15MinAvgTemp.exchangeName = cTicker24HrMaxFinalTemp.exchangeName
+																							AND cTicker15MinAvgTemp.tradePair = cTicker24HrMaxFinalTemp.tradePair
+																							AND FROM_UNIXTIME((UNIX_TIMESTAMP(recordTime)) +1800) = cTicker24HrMaxFinalTemp.timeOfMax);                                                                                           
+
+ALTER TABLE cTicker24HrMaxFinalPlus60Minus30 ADD INDEX exchangePair (exchangeName, tradePair, recordDay);
+
+
+
+CREATE TABLE cTicker24HrMaxFinalPlus60Minus45 (
+	exchangeName VARCHAR(15) NULL,
+	tradePair VARCHAR(20) NULL,
+	recordDay DATE NULL,
+	maxPriceUSD FLOAT NULL,
+    timeOfMax DATETIME NULL,
+	priceUSDMinus45 FLOAT NULL,
+	priceUSDMinus30 FLOAT NULL,
+    priceUSDMinus15 FLOAT NULL,
+	priceUSDPlus15 FLOAT NULL,
+    priceUSDPlus30 FLOAT NULL,
+    priceUSDPlus45 FLOAT NULL,
+	priceUSDPlus60 FLOAT NULL
+);
+
+INSERT into cTicker24HrMaxFinalPlus60Minus45
+SELECT cTicker24HrMaxFinalTemp.exchangeName, cTicker24HrMaxFinalTemp.tradePair, cTicker24HrMaxFinalTemp.recordDay, 
+cTicker24HrMaxFinalTemp.maxPriceUSD, cTicker24HrMaxFinalTemp.timeOfMax, cTicker15MinAvgTemp.askPriceUSD,
+cTicker24HrMaxFinalTemp.priceUSDMinus30, cTicker24HrMaxFinalTemp.priceUSDMinus15,
+cTicker24HrMaxFinalTemp.priceUSDPlus15, cTicker24HrMaxFinalTemp.priceUSDPlus30, cTicker24HrMaxFinalTemp.priceUSDPlus45,
+cTicker24HrMaxFinalTemp.priceUSDPlus60
+from cTicker24HrMaxFinalPlus60Minus30 AS cTicker24HrMaxFinalTemp
+LEFT JOIN cTicker15MinAvg cTicker15MinAvgTemp ON ( cTicker15MinAvgTemp.exchangeName = cTicker24HrMaxFinalTemp.exchangeName
+																							AND cTicker15MinAvgTemp.tradePair = cTicker24HrMaxFinalTemp.tradePair
+																							AND FROM_UNIXTIME((UNIX_TIMESTAMP(recordTime)) +2700) = cTicker24HrMaxFinalTemp.timeOfMax);                                                                                           
+
+ALTER TABLE cTicker24HrMaxFinalPlus60Minus45 ADD INDEX exchangePair (exchangeName, tradePair, recordDay);
+
+CREATE TABLE cTicker24HrMaxFinalPlus60Minus60 (
+	exchangeName VARCHAR(15) NULL,
+	tradePair VARCHAR(20) NULL,
+	recordDay DATE NULL,
+	maxPriceUSD FLOAT NULL,
+    timeOfMax DATETIME NULL,
+	priceUSDMinus60 FLOAT NULL,
+	priceUSDMinus45 FLOAT NULL,
+	priceUSDMinus30 FLOAT NULL,
+    priceUSDMinus15 FLOAT NULL,
+	priceUSDPlus15 FLOAT NULL,
+    priceUSDPlus30 FLOAT NULL,
+    priceUSDPlus45 FLOAT NULL,
+	priceUSDPlus60 FLOAT NULL
+);
+
+INSERT into cTicker24HrMaxFinalPlus60Minus60
+SELECT cTicker24HrMaxFinalTemp.exchangeName, cTicker24HrMaxFinalTemp.tradePair, cTicker24HrMaxFinalTemp.recordDay, 
+cTicker24HrMaxFinalTemp.maxPriceUSD, cTicker24HrMaxFinalTemp.timeOfMax, cTicker15MinAvgTemp.askPriceUSD,
+cTicker24HrMaxFinalTemp.priceUSDMinus45, cTicker24HrMaxFinalTemp.priceUSDMinus30, cTicker24HrMaxFinalTemp.priceUSDMinus15,
+cTicker24HrMaxFinalTemp.priceUSDPlus15, cTicker24HrMaxFinalTemp.priceUSDPlus30, cTicker24HrMaxFinalTemp.priceUSDPlus45,
+cTicker24HrMaxFinalTemp.priceUSDPlus60
+from cTicker24HrMaxFinalPlus60Minus45 AS cTicker24HrMaxFinalTemp
+LEFT JOIN cTicker15MinAvg cTicker15MinAvgTemp ON ( cTicker15MinAvgTemp.exchangeName = cTicker24HrMaxFinalTemp.exchangeName
+																							AND cTicker15MinAvgTemp.tradePair = cTicker24HrMaxFinalTemp.tradePair
+																							AND FROM_UNIXTIME((UNIX_TIMESTAMP(recordTime)) +3600) = cTicker24HrMaxFinalTemp.timeOfMax);                                                                                           
+
+ALTER TABLE cTicker24HrMaxFinalPlus60Minus60 ADD INDEX exchangePair (exchangeName, tradePair, recordDay);
+
 -- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- creating the min table
 CREATE TABLE cTicker24HrMin (
@@ -252,9 +364,74 @@ UPDATE cTicker24HrMinMaxPlus60NoNull SET priceUSDMaxPlus30 = priceUSDMaxPlus15 w
 UPDATE cTicker24HrMinMaxPlus60NoNull SET priceUSDMaxPlus45 = priceUSDMaxPlus30 where priceUSDMaxPlus45 IS NULL;
 UPDATE cTicker24HrMinMaxPlus60NoNull SET priceUSDMaxPlus60 = priceUSDMaxPlus45 where priceUSDMaxPlus60 IS NULL;
 use pocu3;
+
+
+CREATE TABLE cTicker24HrMinMaxPlus60Minus60 (
+	exchangeName VARCHAR(15) NULL,
+	tradePair VARCHAR(20) NULL,
+	recordDay DATETIME NULL,
+	minPriceUSD FLOAT NULL,
+    timeOfMin DATETIME NULL,
+	maxPriceUSD FLOAT NULL,
+    timeOfMax DATETIME NULL,
+	atMaxMinus60 FLOAT NULL,
+	atMaxMinus45 FLOAT NULL,
+	atMaxMinus30 FLOAT NULL,
+    atMaxMinus15 FLOAT NULL,
+	atMaxPlus15 FLOAT NULL,
+    atMaxPlus30 FLOAT NULL,
+    atMaxPlus45 FLOAT NULL,
+	atMaxPlus60 FLOAT NULL
+);
+
+INSERT INTO cTicker24HrMinMaxPlus60Minus60
+select cTicker24HrMaxFinalTemp.exchangeName, cTicker24HrMaxFinalTemp.tradePair, cTicker24HrMaxFinalTemp.recordDay, 
+cTicker24HrMaxFinalTemp.minPriceUSD, cTicker24HrMaxFinalTemp.timeOfMin, cTicker24HrMaxFinalTemp.maxPriceUSD, 
+cTicker24HrMaxFinalTemp.timeOfMax , 
+cTicker24HrFinalTemp.priceUSDMinus60, cTicker24HrFinalTemp.priceUSDMinus45, cTicker24HrFinalTemp.priceUSDMinus30, 
+cTicker24HrFinalTemp.priceUSDMinus15, 
+cTicker24HrMaxFinalTemp.priceUSDMaxPlus15, cTicker24HrMaxFinalTemp.priceUSDMaxPlus30, 
+cTicker24HrMaxFinalTemp.priceUSDMaxPlus45, cTicker24HrMaxFinalTemp.priceUSDMaxPlus60
+from  cTicker24HrMinMaxPlus60NoNull AS cTicker24HrMaxFinalTemp 
+LEFT JOIN
+cTicker24HrMaxFinalPlus60Minus60 cTicker24HrFinalTemp ON (cTicker24HrFinalTemp.exchangeName = cTicker24HrMaxFinalTemp.exchangeName
+																	AND cTicker24HrFinalTemp.tradePair = cTicker24HrMaxFinalTemp.tradePair
+																	AND cTicker24HrFinalTemp.recordDay = cTicker24HrMaxFinalTemp.recordDay);      
+                                                 
+ALTER TABLE cTicker24HrMinMaxPlus60Minus60 ADD INDEX exchangePair (exchangeName, tradePair, recordDay);
+
+CREATE TABLE cTicker24HrMinMaxPlus60Minus60NoNull LIKE cTicker24HrMinMaxPlus60Minus60; 
+INSERT cTicker24HrMinMaxPlus60Minus60NoNull SELECT * FROM cTicker24HrMinMaxPlus60Minus60;
+
+
+UPDATE cTicker24HrMinMaxPlus60Minus60NoNull SET atMaxMinus45 = atMaxMinus60 where atMaxMinus45 IS NULL;
+UPDATE cTicker24HrMinMaxPlus60Minus60NoNull SET atMaxMinus30 = priceUSDMaxPlus15 where atMaxMinus30 IS NULL;
+UPDATE cTicker24HrMinMaxPlus60Minus60NoNull SET atMaxMinus15 = priceUSDMaxPlus30 where atMaxMinus15 IS NULL;
+
+
 -- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- TEST 
+use pocu3;
+
+SELECT * FROM cTicker24HrMinMaxPlus60Minus60NoNull where recordDay < '2017-10-02 03:00:00';			
+
+SELECT count(*) from cTicker24HrMinMaxPlus60Minus60NoNull where timeOfMax > timeOfMin AND (maxPriceUSD-minPriceUSD)/minPriceUSD > 1
+AND ((atMaxPlus15+atMaxPlus30+atMaxPlus45+atMaxPlus60)/4 > 2*minPriceUSD ||
+(atMaxMinus15+atMaxMinus30+atMaxMinus45+atMaxMinus60)/4 > 2*minPriceUSD ||
+(atMaxPlus15+atMaxPlus30+atMaxMinus15+atMaxMinus30)/4 > 2*minPriceUSD)
+AND exchangeName != 'coinMarketCap' ;
+
+SELECT * FROM cTicker24HrMinMaxPlus60Minus60NoNull where recordDay < '2017-10-02 03:00:00';			
+SELECT count(*) from cTicker24HrMinMaxPlus60Minus60NoNull where timeOfMax > timeOfMin AND (maxPriceUSD-minPriceUSD)/minPriceUSD > 1
+AND (atMaxPlus15+atMaxPlus30+atMaxPlus45+atMaxPlus60)/4 > 0.5*maxPriceUSD 
+AND exchangeName != 'coinMarketCap' ;
+
+SELECT count(*) from cTicker24HrMinMaxPlus60Minus60NoNull where timeOfMax > timeOfMin AND (maxPriceUSD-minPriceUSD)/minPriceUSD > 1
+AND (atMaxPlus15+atMaxPlus30+atMaxPlus45+atMaxPlus60)/4 > 2*minPriceUSD 
+AND exchangeName != 'coinMarketCap' ;
+
+-- del 
 
 SELECT * FROM cTicker24HrMinMaxPlus60NoNull where recordDay < '2017-10-02 03:00:00';														
 SELECT count(*) from cTicker24HrMinMaxPlus60NoNull ;
@@ -263,7 +440,7 @@ SELECT count(*) from cTicker24HrMinMaxPlus60NoNull where timeOfMax > timeOfMin A
 AND (priceUSDMaxPlus15+priceUSDMaxPlus30+priceUSDMaxPlus45+priceUSDMaxPlus60)/4 > 0.5*maxPriceUSD 
 AND exchangeName != 'coinMarketCap';
 
-
+SELECT count(*) from cTicker24HrMinMaxPlus60Minus60 where atMaxMinus45 IS NULL;
 
 SELECT * FROM cTicker24HrMinMaxPlus60 where recordDay < '2017-10-02 03:00:00';														
 SELECT count(*) from cTicker24HrMinMaxPlus60 ;
@@ -279,9 +456,6 @@ AND (((priceUSDMaxPlus15+priceUSDMaxPlus30+priceUSDMaxPlus45)/3) > 0.5*maxPriceU
 
 SELECT count(*) from cTicker24HrMinMaxPlus60 where ((timeOfMax > timeOfMin) AND ((maxPriceUSD-minPriceUSD)/minPriceUSD > 1)
 AND (((priceUSDMaxPlus15+priceUSDMaxPlus30)/2) > 0.5*maxPriceUSD));
-
-
--- del 
 select * from cTicker24HrMinMax where recordDay < '2017-10-02 03:00:00';
 select * from cTicker24HrMaxFinalPlus15 where recordDay < '2017-10-02 03:00:00';
 select * from cTicker24HrMin where recordDay < '2017-10-02 03:00:00';
