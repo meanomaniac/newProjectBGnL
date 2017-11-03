@@ -420,7 +420,7 @@ SELECT count(*) from cTicker24HrMinMaxPlus60Minus60NoNull where timeOfMax > time
 AND ((atMaxPlus15+atMaxPlus30+atMaxPlus45+atMaxPlus60)/4 > 2*minPriceUSD ||
 (atMaxMinus15+atMaxMinus30+atMaxMinus45+atMaxMinus60)/4 > 2*minPriceUSD ||
 (atMaxPlus15+atMaxPlus30+atMaxMinus15+atMaxMinus30)/4 > 2*minPriceUSD)
-AND exchangeName != 'coinMarketCap' ;
+AND exchangeName != 'coinMarketCap' AND exchangeName != 'coinExchange' ;
 
 SELECT * FROM cTicker24HrMinMaxPlus60Minus60NoNull where recordDay < '2017-10-02 03:00:00';			
 SELECT count(*) from cTicker24HrMinMaxPlus60Minus60NoNull where timeOfMax > timeOfMin AND (maxPriceUSD-minPriceUSD)/minPriceUSD > 1
