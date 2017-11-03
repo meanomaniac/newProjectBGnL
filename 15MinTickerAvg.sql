@@ -54,14 +54,14 @@ CREATE TABLE orderHistory15MinAvg (
 	totalSellAmount FLOAT NULL
 );
 
--- took 208 secs
+-- took 185 secs
 INSERT INTO orderHistory15MinAvg
 SELECT exchangeName, tradePair, FROM_UNIXTIME((UNIX_TIMESTAMP(recordTime)) div 900*900 + 900) as timeRecorded,
 avg(totalBuyAmount) as avgTotalBuyAmount, avg(totalSellAmount) as avgTotalSellAmount
 from orderHistory
 GROUP BY tradePair, exchangeName, timeRecorded ORDER BY timeRecorded, tradePair;
  
--- took 17 secs
+-- took 9.5 secs
 ALTER TABLE orderHistory15MinAvg ADD INDEX exchangePair (exchangeName, tradePair);
 
 select count(*) from orderHistory15MinAvg;

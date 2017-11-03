@@ -408,11 +408,60 @@ UPDATE cTicker24HrMinMaxPlus60Minus60NoNull SET atMaxMinus45 = atMaxMinus60 wher
 UPDATE cTicker24HrMinMaxPlus60Minus60NoNull SET atMaxMinus30 = priceUSDMaxPlus15 where atMaxMinus30 IS NULL;
 UPDATE cTicker24HrMinMaxPlus60Minus60NoNull SET atMaxMinus15 = priceUSDMaxPlus30 where atMaxMinus15 IS NULL;
 
+-- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- combining the minMax table with openOrders and OrderHistory
+CREATE TABLE dayDiffMinMaxWithTradingInfo (
+	exchangeName VARCHAR(15) NULL,
+	tradePair VARCHAR(20) NULL,
+	recordDay DATETIME NULL,
+	minPriceUSD FLOAT NULL,
+    timeOfMin DATETIME NULL,
+	maxPriceUSD FLOAT NULL,
+    timeOfMax DATETIME NULL,
+	atMaxMinus60 FLOAT NULL,
+	atMaxMinus45 FLOAT NULL,
+	atMaxMinus30 FLOAT NULL,
+    atMaxMinus15 FLOAT NULL,
+	atMaxPlus15 FLOAT NULL,
+    atMaxPlus30 FLOAT NULL,
+    atMaxPlus45 FLOAT NULL,
+	atMaxPlus60 FLOAT NULL,
+    openBuyAmount FLOAT NULL,
+    openSellAmount FLOAT NULL,
+    buyHistoryAmount FLOAT NULL,
+    sellHistoryAmount FLOAT NULL
+);
+
+INSERT INTO dayDiffMinMaxWithTradingInfo (exchangeName, tradePair, recordDay, minPriceUSD, timeOfMin, maxPriceUSD, timeOfMax, 
+						atMaxMinus60, atMaxMinus45, atMaxMinus30, atMaxMinus15, atMaxPlus15, atMaxPlus30, atMaxPlus45, atMaxPlus60)
+SELECT * FROM cTicker24HrMinMaxPlus60Minus60NoNull;
+
+ALTER TABLE dayDiffMinMaxWithTradingInfo ADD INDEX exchangePair (exchangeName, tradePair, recordDay);
+
+INSERT INTO dayDiffMinMaxWithTradingInfo (openBuyAmount, openSellAmount)
+SELECT  openOrders15MinAvgTemp.totalBuyAmount, openOrders15MinAvgTemp.totalSellAmount
+ from dayDiffMinMaxWithTradingInfo as dayDiffMinMaxWithTradingInfoTemp
+LEFT JOIN 
+openOrders15MinAvg openOrders15MinAvgTemp ON ( openOrders15MinAvgTemp.exchangeName = dayDiffMinMaxWithTradingInfoTemp.exchangeName
+																							AND openOrders15MinAvgTemp.tradePair = dayDiffMinMaxWithTradingInfoTemp.tradePair
+																							AND openOrders15MinAvgTemp.recordTime = dayDiffMinMaxWithTradingInfoTemp.timeOfMax);
+
+
+INSERT INTO dayDiffMinMaxWithTradingInfo (buyHistoryAmount, sellHistoryAmount)
+SELECT  orderHistory15MinAvgTemp.totalBuyAmount, orderHistory15MinAvgTemp.totalSellAmount
+ from dayDiffMinMaxWithTradingInfo as dayDiffMinMaxWithTradingInfoTemp
+LEFT JOIN 
+orderHistory15MinAvg orderHistory15MinAvgTemp ON ( orderHistory15MinAvgTemp.exchangeName = dayDiffMinMaxWithTradingInfoTemp.exchangeName
+																							AND orderHistory15MinAvgTemp.tradePair = dayDiffMinMaxWithTradingInfoTemp.tradePair
+																							AND orderHistory15MinAvgTemp.recordTime = dayDiffMinMaxWithTradingInfoTemp.timeOfMax);
 
 -- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- TEST 
 use pocu3;
+
+SELECT * FROM dayDiffMinMaxWithTradingInfo where recordDay < '2017-10-02 03:00:00';	
+
 
 SELECT * FROM cTicker24HrMinMaxPlus60Minus60NoNull where recordDay < '2017-10-02 03:00:00';			
 
