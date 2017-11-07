@@ -464,13 +464,40 @@ use pocu3;
 
 SELECT DISTINCT(tradePair) from dayDiffMinMaxWithTradingInfo where UPPER(tradePair) REGEXP "AV|888|BUCKS";
 
+
+
 SELECT * FROM dayDiffMinMaxWithTradingInfo where recordDay < '2017-10-02 03:00:00';	
-SELECT count(*) from dayDiffMinMaxWithTradingInfo where timeOfMax > timeOfMin AND (maxPriceUSD-minPriceUSD)/minPriceUSD > 1
+
+Select distinct(CONCAT(exchangeName, tradePair)) from 
+(SELECT exchangeName, tradePair, timeOfMax AS exchPairDate from dayDiffMinMaxWithTradingInfo 
+where timeOfMax > timeOfMin AND (maxPriceUSD-minPriceUSD)/minPriceUSD > 1
 AND ((atMaxPlus15+atMaxPlus30+atMaxPlus45+atMaxPlus60)/4 > 2*minPriceUSD OR
 (atMaxMinus15+atMaxMinus30+atMaxMinus45+atMaxMinus60)/4 > 2*minPriceUSD OR
 (atMaxPlus15+atMaxPlus30+atMaxMinus15+atMaxMinus30)/4 > 2*minPriceUSD)
 AND exchangeName != 'coinMarketCap' AND exchangeName != 'coinExchange' 
-AND UPPER(tradePair) REGEXP "BCH|ETH|XRP|USDT|LTC|EOS|DASH|ETC|QTUM|NEO|ZEC|XMR|OMG|VTC|BCC|XLM|HSR|GRS|WAVES|ZEN|MIOTA|WTC|STRAT|SYS|LSK|BTG|ETP|STORJ|MCO|GNT|FCT|BAT|POWR|SNT|VRC|XEM|KMD|BTS|NXT|SYNX|ARK|XVG|XDN|SALT|MTL|BCN|NAS|ADA|PAY|ADX|ARDR|DOGE|MONA|LINK|BQX|BNB|KNC|RISE|DGB|XST|MOD|TRST|OK|CVC|EVX|ZRX|AST|VIA|DNT|SC|GXS|SNGLS|ATB|MAID|TRX|PIVX|KCS|BNT|RPX|NAV|CTR|XZC|GAS|TX|REP|STEEM|MCAP|FTC|GNO|RBY|GAME|ICN";
+AND UPPER(tradePair) REGEXP 
+"BCH|ETH|XRP|USDT|LTC|EOS|DASH|ETC|QTUM|NEO|ZEC|XMR|OMG|VTC|BCC|XLM|HSR|GRS|WAVES|ZEN|MIOTA|WTC|STRAT|SYS|LSK|BTG|ETP|STORJ|MCO|GNT|FCT|BAT|POWR|SNT|VRC|XEM|KMD|BTS|NXT|SYNX|ARK|XVG|XDN|SALT|MTL|BCN|NAS|ADA|PAY|ADX|ARDR|DOGE|MONA|LINK|BQX|BNB|KNC|RISE|DGB|XST|MOD|TRST|OK|CVC|EVX|ZRX|AST|VIA|DNT|SC|GXS|SNGLS|ATB|MAID|TRX|PIVX|KCS|BNT|RPX|NAV|CTR|XZC|GAS|TX|REP|STEEM|MCAP|FTC|GNO|RBY|GAME|ICN") as test;
+
+
+SELECT exchangeName, tradePair, timeOfMax AS exchPairDate, ROUND((maxPriceUSD-minPriceUSD)/minPriceUSD*100,2) as priceChangePerc
+from dayDiffMinMaxWithTradingInfo 
+where timeOfMax > timeOfMin AND (maxPriceUSD-minPriceUSD)/minPriceUSD > 1
+AND ((atMaxPlus15+atMaxPlus30+atMaxPlus45+atMaxPlus60)/4 > 2*minPriceUSD OR
+(atMaxMinus15+atMaxMinus30+atMaxMinus45+atMaxMinus60)/4 > 2*minPriceUSD OR
+(atMaxPlus15+atMaxPlus30+atMaxMinus15+atMaxMinus30)/4 > 2*minPriceUSD)
+AND exchangeName != 'coinMarketCap' AND exchangeName != 'coinExchange' 
+AND UPPER(tradePair) REGEXP 
+"BCH|ETH|XRP|USDT|LTC|EOS|DASH|ETC|QTUM|NEO|ZEC|XMR|OMG|VTC|BCC|XLM|HSR|GRS|WAVES|ZEN|MIOTA|WTC|STRAT|SYS|LSK|BTG|ETP|STORJ|MCO|GNT|FCT|BAT|POWR|SNT|VRC|XEM|KMD|BTS|NXT|SYNX|ARK|XVG|XDN|SALT|MTL|BCN|NAS|ADA|PAY|ADX|ARDR|DOGE|MONA|LINK|BQX|BNB|KNC|RISE|DGB|XST|MOD|TRST|OK|CVC|EVX|ZRX|AST|VIA|DNT|SC|GXS|SNGLS|ATB|MAID|TRX|PIVX|KCS|BNT|RPX|NAV|CTR|XZC|GAS|TX|REP|STEEM|MCAP|FTC|GNO|RBY|GAME|ICN";
+
+SELECT * from cTicker where CONCAT(exchangeName, tradePair, DATE(recordTime)) IN 
+(SELECT CONCAT(exchangeName, tradePair, DATE(timeOfMax)) AS exchPairDate from dayDiffMinMaxWithTradingInfo 
+where timeOfMax > timeOfMin AND (maxPriceUSD-minPriceUSD)/minPriceUSD > 1
+AND ((atMaxPlus15+atMaxPlus30+atMaxPlus45+atMaxPlus60)/4 > 2*minPriceUSD OR
+(atMaxMinus15+atMaxMinus30+atMaxMinus45+atMaxMinus60)/4 > 2*minPriceUSD OR
+(atMaxPlus15+atMaxPlus30+atMaxMinus15+atMaxMinus30)/4 > 2*minPriceUSD)
+AND exchangeName != 'coinMarketCap' AND exchangeName != 'coinExchange' 
+AND UPPER(tradePair) REGEXP 
+"BCH|ETH|XRP|USDT|LTC|EOS|DASH|ETC|QTUM|NEO|ZEC|XMR|OMG|VTC|BCC|XLM|HSR|GRS|WAVES|ZEN|MIOTA|WTC|STRAT|SYS|LSK|BTG|ETP|STORJ|MCO|GNT|FCT|BAT|POWR|SNT|VRC|XEM|KMD|BTS|NXT|SYNX|ARK|XVG|XDN|SALT|MTL|BCN|NAS|ADA|PAY|ADX|ARDR|DOGE|MONA|LINK|BQX|BNB|KNC|RISE|DGB|XST|MOD|TRST|OK|CVC|EVX|ZRX|AST|VIA|DNT|SC|GXS|SNGLS|ATB|MAID|TRX|PIVX|KCS|BNT|RPX|NAV|CTR|XZC|GAS|TX|REP|STEEM|MCAP|FTC|GNO|RBY|GAME|ICN");
 
 SELECT * FROM dayDiffMinMaxWithTradingInfo where recordDay < '2017-10-02 03:00:00';	
 SELECT count(*) from dayDiffMinMaxWithTradingInfo where timeOfMax > timeOfMin AND (maxPriceUSD-minPriceUSD)/minPriceUSD > 1
