@@ -1,3 +1,5 @@
+use pocu3;
+
 CREATE TABLE CCIntTicker (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
@@ -15,7 +17,7 @@ AND exchangeName != 'coinMarketCap' AND exchangeName != 'coinExchange' );
 
 ALTER TABLE CCIntTicker ADD INDEX exchangePair (exchangeName, tradePair);
 
-
+select count(*) from CCIntTicker;
 -- del
 -- 20 mins
 

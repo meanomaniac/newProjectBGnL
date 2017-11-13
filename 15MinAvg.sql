@@ -19,6 +19,8 @@ CREATE TABLE cTicker15MinAvgBTCPrice (
 	recordTime DATETIME NULL
 );
 
+select * from cTicker15MinAvgBTCPrice where tradePair = 'BTC-BCY' and exchangeName = 'bittrex';
+
 -- took 208 secs
 INSERT INTO cTicker15MinAvg
 SELECT exchangeName, tradePair, avg(askPriceUSD) as avgPriceUSD, 
@@ -87,3 +89,12 @@ select recordTime, askPriceUSD from cTicker15MinAvg where exchangeName ="bittrex
 select * from orderHistory where exchangeName ="livecoin" AND tradePair = "CVC/BTC" AND recordTime > "2017-10-16 13:45:00" AND recordTime < "2017-10-16 20:00:00";
 
 select * from orderHistory15MinAvg where exchangeName ="livecoin" AND tradePair = "CVC/BTC";
+
+-- del
+select exchangeName, tradePair, @a := @a + askPriceUSD as newCol1, 
+(case 1<3 
+WHEN true then @b := @a*2
+WHEN false then @b := 0 END) as newCol2
+from cTicker15MinAvgBTCPrice
+JOIN (select @a := 0,  @b := 0) t
+where tradePair = 'BTC-BCY' and exchangeName = 'bittrex';

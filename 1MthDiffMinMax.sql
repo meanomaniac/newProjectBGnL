@@ -499,6 +499,7 @@ AND exchangeName != 'coinMarketCap' AND exchangeName != 'coinExchange' ;
 
 SELECT count(*) FROM mthDiffMinMaxWithTradingInfo;	
 
+select * from mthDiffMinMaxWithTradingInfo where tradePair = 'BTC-BCY' and exchangeName = 'bittrex';
 
 -- del 
 
