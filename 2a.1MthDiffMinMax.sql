@@ -1,3 +1,27 @@
+/*
+This is the 2nd script. Its goal is to generate a table called 'mthDiffMinMaxWithTradingInfo' with the following:
+For about 36 days of data gathered at the time of the development of this script, for every trade pair in each exchange, get the:
+
+1) minimum price over the entire duration and at what time it happened
+2) maximum price over the entire duration and at what time it happened
+3) the price every 15 mins for 60 mins before and after the max occured 
+4) the buys and sells that are present as openOrders at the time of max
+5) the buys and sells history at the time of max 
+
+
+The above table is achieved stepwise with a new table generated for each of:
+
+1) first getting the max of each trade pair in each exchange
+2) then getting the time of that max value
+3) then joining the above 2 tables to have the max value and the max time in the same table
+4) then creating a table for getting the price of the tradepair every 15 mins for 60 mins before and after the time of max
+5) repeat the steps 1), 2) and 3) from above but this time for getting the min value and the time of min
+6) then the table from step 4) and step 6) are combined to form the cTicker1MthHrMinMaxPlus60Minus60 table (note that you may find 
+2 additional tables just above this table - cTicker1MthHrMinMax and cTicker1MthHrMinMaxPlus60 but these may not be needed)
+7) finally the table mthDiffMinMaxWithTradingInfo is created which combines the table from the above step and the tables for the 15 mins avg
+of openOrders and ordeHistory from the previous script to add the the buys and sells history at the time of max 
+
+*/
 use pocu3;
 -- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- creating the max table
@@ -290,6 +314,8 @@ ALTER TABLE cTicker1MthHrMinFInal ADD INDEX exchangePair (exchangeName, tradePai
 -- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
 -- creating the combined min, max table
 
+ -- the below 2 tables may not be needed
+
 CREATE TABLE cTicker1MthHrMinMax (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
@@ -345,6 +371,7 @@ UPDATE cTicker1MthHrMinMaxPlus60NoNull SET priceUSDMaxPlus45 = priceUSDMaxPlus30
 UPDATE cTicker1MthHrMinMaxPlus60NoNull SET priceUSDMaxPlus60 = priceUSDMaxPlus45 where priceUSDMaxPlus60 IS NULL;
 use pocu3;
 
+ -- the above may not be needed
 
 CREATE TABLE cTicker1MthHrMinMaxPlus60Minus60 (
 	exchangeName VARCHAR(15) NULL,

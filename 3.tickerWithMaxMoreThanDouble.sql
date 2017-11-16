@@ -1,3 +1,8 @@
+/*
+This is the 3rd script. This creates a subset of the cTicker15MinAvgBTCPrice table from the 1st script to include only those trade pairs where the 
+max is atleast double or more of that of the min
+*/
+
 use pocu3;
 
 CREATE TABLE CCIntTicker (

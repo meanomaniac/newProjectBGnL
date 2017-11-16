@@ -1,3 +1,13 @@
+/* 
+This is the 1st script which creates 3 kinds of tables. 
+
+1) The first kind has 2 versions (one with and the other without the BTC price) -cTicker15MinAvg and cTicker15MinAvgBTCPrice
+These table simply smoothens out the cTciker table, by gettng the average price every 15 mins (the cTicker has price values ever 30 secs). 
+
+The other 2 tables: openOrders15MinAvg and orderHistory15MinAvg in the script get the 15 min versions (as opposed to the 30 sec versions) 
+of the other 2 tables recorded from the bot: openOrders and orderHistory.
+*/
+
 use pocu3;
 
 describe cTicker;
