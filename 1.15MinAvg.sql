@@ -35,6 +35,7 @@ select * from cTicker15MinAvgBTCPrice where tradePair = 'BTC-BCY' and exchangeNa
 INSERT INTO cTicker15MinAvg
 SELECT exchangeName, tradePair, avg(askPriceUSD) as avgPriceUSD, 
 FROM_UNIXTIME((UNIX_TIMESTAMP(recordTime)) div 900*900 + 900) as timeRecorded
+-- the division by 900 in the from clause above ensures that every record in a 15 min time range have tge same value for timeRecorded
 from cTicker
 GROUP BY tradePair, exchangeName, timeRecorded ORDER BY timeRecorded, tradePair;
 -- took 17 secs

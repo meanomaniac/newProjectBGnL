@@ -28,6 +28,14 @@ CREATE TABLE hikeStepDurations (
 
 INSERT INTO hikeStepDurations
 SELECT CCIntTickerTemp.exchangeName, CCIntTickerTemp.tradePair, 
+/* the priceStepCounterVar increments when the price changes by 10% of the min value. This variable/column is being
+created so that records within a step (every 10% hike) can be grouped and then the duration for that step can be 
+calculated (in addition to some other data)
+the priceStepVar calculates the 10th digit of the price to enable us to determine the step that the specifc record belongs to.
+
+the following switch case like construct returns the same value of the priceStepCounterVar if the priceStepVar
+hasn't changed from the previous record. It increments priceStepCounterVar by 1 if it did.
+*/
 (case @priceStepVar != FLOOR(((CCIntTickerTemp.askPriceUSD - mthDiffMinMaxWithTradingInfoTemp.minPriceUSD)
 /mthDiffMinMaxWithTradingInfoTemp.minPriceUSD*100)/10) 
 WHEN true then @priceStepCounterVar := @priceStepCounterVar +1 
@@ -45,9 +53,11 @@ time_to_sec(timediff(mthDiffMinMaxWithTradingInfoTemp.timeOfMax, max(CCIntTicker
 FROM (
 select * from CCIntTicker
 ORDER BY CONCAT(exchangeName, tradePair), recordTime) CCIntTickerTemp
+-- the following join enables us to get the price and time of the min and max for each unique tradePair
 	LEFT JOIN mthDiffMinMaxWithTradingInfo mthDiffMinMaxWithTradingInfoTemp 
 	ON (mthDiffMinMaxWithTradingInfoTemp.exchangeName = CCIntTickerTemp.exchangeName AND
 			mthDiffMinMaxWithTradingInfoTemp.tradePair = CCIntTickerTemp.tradePair)
+-- the following is how you define variables in mySql            
 	JOIN (select @priceStepVar := 0,  @priceStepCounterVar := 0) t       
 WHERE recordTime > mthDiffMinMaxWithTradingInfoTemp.timeOfMin 
 -- AND recordTime < mthDiffMinMaxWithTradingInfoTemp.timeOfMax

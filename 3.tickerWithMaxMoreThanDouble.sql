@@ -15,6 +15,7 @@ CREATE TABLE CCIntTicker (
 
 INSERT INTO CCIntTicker
 SELECT exchangeName, tradePair, askPriceUSD, askPriceBTC, recordTime from cTicker15MinAvgBTCPrice where CONCAT(exchangeName, tradePair) IN 
+-- the following gives all the unique tradePair combos that have a max value more than twice of the min and that the max has occured after the min
 (SELECT CONCAT(exchangeName, tradePair) AS exchTP
 from mthDiffMinMaxWithTradingInfo 
 where timeOfMax > timeOfMin AND (maxPriceUSD-minPriceUSD)/minPriceUSD > 1
@@ -23,6 +24,8 @@ AND exchangeName != 'coinMarketCap' AND exchangeName != 'coinExchange' );
 ALTER TABLE CCIntTicker ADD INDEX exchangePair (exchangeName, tradePair);
 
 select count(*) from CCIntTicker;
+
+
 -- del
 -- 20 mins
 
