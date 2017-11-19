@@ -14,6 +14,7 @@ CREATE TABLE steepHikeStepDurationsWAdjTracker (
 	avgPriceBTC FLOAT NULL,
     buyHistoryAmount FLOAT NULL,
     openBuyAmount FLOAT NULL,
+    minTimeForStep DATETIME NULL,
     maxTimeForStep DATETIME NULL,
 	shortestTimeFromMin FLOAT NULL,
     shortestTimeFromMax FLOAT NULL,
@@ -24,7 +25,7 @@ CREATE TABLE steepHikeStepDurationsWAdjTracker (
 
 INSERT into steepHikeStepDurationsWAdjTracker
 select 	exchangeName, tradePair, priceHikeStep, priceStepDurationInHrs, avgPriceUSD, 
-avgPriceBTC, buyHistoryAmount , openBuyAmount , maxTimeForStep, shortestTimeFromMin, shortestTimeFromMax, 
+avgPriceBTC, buyHistoryAmount , openBuyAmount , minTimeForStep, maxTimeForStep, shortestTimeFromMin, shortestTimeFromMax, 
 (case @stepCounterFromPreviousRecord < priceHikeStep AND @previousTradePair = CONCAT(exchangeName, tradePair) 
 AND priceStepDurationInHrs < 3
 WHEN true then @adjacentRecordTracker := @adjacentRecordTracker 
@@ -37,7 +38,7 @@ JOIN (select @stepCounterFromPreviousRecord := 0, @adjacentRecordTracker := 0, @
 ALTER TABLE steepHikeStepDurationsWAdjTracker ADD INDEX exchangePair (exchangeName, tradePair);
 select exchangeName, tradePair, priceHikeStep, adjacentRowTracker from steepHikeStepDurationsWAdjTracker;
 
-select * from steepHikeStepDurationsWAdjTracker where tradePair = 'BTC-2GIVE';
+select * from steepHikeStepDurationsWAdjTracker where tradePair = 'BTC-BCY';
 
 CREATE TABLE steepHikeStepDurationsMinMax (
 	exchangeName VARCHAR(15) NULL,
@@ -59,7 +60,7 @@ CREATE TABLE steepHikeStepDurationsMinMax (
     
 INSERT into steepHikeStepDurationsMinMax
 select exchangeName, tradePair, min(priceHikeStep), max(priceHikeStep), min(maxTimeForStep), max(maxTimeForStep), 
-time_to_sec(timediff(max(maxTimeForStep), min(maxTimeForStep))) / 3600,
+time_to_sec(timediff(max(minTimeForStep), min(maxTimeForStep))) / 3600,
 /* use the above for getting the duration of the whole spike instead of sum(totalDurationOfAllStepsInHrs) as the latter will include the time 
 of the first step which is not desirable as the firrst step may have lasted a very long time
 */
@@ -70,7 +71,6 @@ from steepHikeStepDurationsWAdjTracker group by adjacentRowTracker;
 ALTER TABLE steepHikeStepDurationsMinMax ADD INDEX exchangePair (exchangeName, tradePair);
 
 select * from steepHikeStepDurationsMinMax where maxPriceHikeStep - minPriceHikeStep > 4 and minPriceHikeStep < 15;
-
 
 -- del
 
@@ -94,5 +94,3 @@ INSERT into steepHikeStepDurations
 select exchangeName, tradePair , priceHikeStep, priceStepDurationInHrs, avgPriceUSD, 
 avgPriceBTC, buyHistoryAmount , openBuyAmount , maxTimeForStep, shortestTimeFromMin, shortestTimeFromMax
 from hikeStepDurations where priceStepDurationInHrs <= 3;
-
-     
