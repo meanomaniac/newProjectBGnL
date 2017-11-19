@@ -67,6 +67,7 @@ ORDER BY CONCAT(CCIntTickerTemp.exchangeName, CCIntTickerTemp.tradePair), CCIntT
 ALTER TABLE hikeStepDurations ADD INDEX exchangePair (exchangeName, tradePair);
 
 SELECT * FROM hikeStepDurations;
+SELECT * FROM hikeStepDurations where tradePair = 'BTC-2GIVE';
 SELECT COUNT(*) FROM hikeStepDurations;
 SELECT COUNT(DISTINCT(tradePair)) FROM hikeStepDurations where buyHistoryAmount > 10;
 select priceHikeStep, priceStepDurationInHrs from hikeStepDurations where exchangeName ='bittrex' and tradePair = 'BTC-CLUB';
