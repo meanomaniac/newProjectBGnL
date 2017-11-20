@@ -115,7 +115,7 @@ JOIN (select @stepDiffPreviousTwoMins := 0, @timeSincePreviousSpike := 0,
 
 ALTER TABLE steepHikeStepDurationsMinMaxWLastSpikeInfo ADD INDEX exchangePair (exchangeName, tradePair);
 
-select * from steepHikeStepDurationsMinMaxWLastSpikeInfo where maxPriceHikeStep - minPriceHikeStep > 2
+select * from steepHikeStepDurationsMinMaxWLastSpikeInfo where (maxPriceHikeStep - minPriceHikeStep)/ minPriceHikeStep > 0.3
  AND stepDiffLastTwoMins > 2; 
 -- AND timeSinceLastSpike < 24;
 
