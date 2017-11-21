@@ -1,9 +1,22 @@
 /*
+This is the 5th script. 
+The first table (steepHikeStepDurationsWAdjTracker) uses hikeStepDurations to do 2 things:
+	a) gets all rows that have a step duration of less than 3 hours
+    b) categorizes rows that have a step value higher than the previous row under a single group - tracked by the
+		adjacentRowTracker column
+The 2nd table (steepHikeStepDurationsMinMax) uses the categorization from the first table and records the 
+min and max of the stepHikes, price and time for each category/group (adjacentRowTracker) 
+The next step is to get the time difference between subsequent spikes for each trade pair.
+But before we do that we need to ensure that we first get a table of only those rows that represent valid spikes (otherwise
+no point getting time difference between invalid spikes). This is why this process needs to be separated into 2 
+different tables. The 3rd table steepHikeStepDurationsMinMaxWLastStepDiff gets the difference between the mins
+of the current spike and the previous spike. Then finally the 4th table, 
+steepHikeStepDurationsMinMaxWLastSpikeInfo gets the time difference between only those spikes that have their 
+mins exceed the mins of the previous spikes by atleast 2 steps (20% of min) and that have a stepHike of more than
+30%.
 
 */
 use pocu3;
-
-drop table steepHikeStepDurationsWAdjTracker;
 
 CREATE TABLE steepHikeStepDurationsWAdjTracker (
 	exchangeName VARCHAR(15) NULL,
@@ -38,7 +51,7 @@ JOIN (select @stepCounterFromPreviousRecord := 0, @adjacentRecordTracker := 0, @
 ALTER TABLE steepHikeStepDurationsWAdjTracker ADD INDEX exchangePair (exchangeName, tradePair);
 
 select exchangeName, tradePair, priceHikeStep, adjacentRowTracker from steepHikeStepDurationsWAdjTracker;
-select * from steepHikeStepDurationsWAdjTracker where tradePair = 'BTC-BCY';
+select * from steepHikeStepDurationsWAdjTracker where tradePair = 'BTC-MONA';
 
 CREATE TABLE steepHikeStepDurationsMinMax (
 	exchangeName VARCHAR(15) NULL,
@@ -73,7 +86,35 @@ ALTER TABLE steepHikeStepDurationsMinMax ADD INDEX exchangePair (exchangeName, t
 select * from steepHikeStepDurationsMinMax where maxPriceHikeStep - minPriceHikeStep > 4 and minPriceHikeStep < 15;
 select * from steepHikeStepDurationsMinMax where maxPriceHikeStep - minPriceHikeStep > 2;
 
-CREATE TABLE steepHikeStepDurationsMinMaxWLastStepDiff (
+CREATE TABLE steepHikeStepsMinMaxWMinimumHeight (
+	exchangeName VARCHAR(15) NULL,
+	tradePair VARCHAR(20) NULL,
+	minPriceHikeStep FLOAT NULL,
+    maxPriceHikeStep FLOAT NULL,
+    minOfMaxTimeForStep DATETIME NULL,
+    maxOfMaxTimeForStep DATETIME NULL,
+	totalDurationOfAllStepsInHrs FLOAT NULL,
+    minAvgPriceUSD FLOAT NULL,
+	maxAvgPriceUSD FLOAT NULL,
+    minAvgPriceBTC FLOAT NULL,
+	maxAvgPriceBTC FLOAT NULL,
+    avgBuyHistoryAmount FLOAT NULL,
+    avgOpenBuyAmount FLOAT NULL,
+	minShortestTimeFromMin FLOAT NULL,
+    maxShortestTimeFromMax FLOAT NULL
+    );
+
+INSERT into steepHikeStepsMinMaxWMinimumHeight
+select * from 
+( select * from steepHikeStepDurationsMinMax 
+/* below we are converting steps into actual approximate values before comparing for a change of atleast 30%. 
+Recall that steps are every 10% change from the min
+*/
+ where ((maxPriceHikeStep/10+1) - (minPriceHikeStep/10+1))/ (minPriceHikeStep/10+1) > 0.3) steepHikeStepDurationsMinMaxWLastStepDiffTemp;
+
+ALTER TABLE steepHikeStepsMinMaxWMinimumHeight ADD INDEX exchangePair (exchangeName, tradePair);
+
+CREATE TABLE  steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
 	minPriceHikeStep FLOAT NULL,
@@ -90,91 +131,40 @@ CREATE TABLE steepHikeStepDurationsMinMaxWLastStepDiff (
 	minShortestTimeFromMin FLOAT NULL,
     maxShortestTimeFromMax FLOAT NULL,
     stepDiffLastTwoMins FLOAT NULL,
+	timeSinceLastSpike FLOAT NULL,
 	lastMaxStep FLOAT NULL,
-	lastTradePair  VARCHAR(50) NULL
+    lastMaxTime DATETIME NULL,
+    lastTradePair  VARCHAR(50) NULL
     );
+
  
-INSERT into  steepHikeStepDurationsMinMaxWLastStepDiff
+INSERT into  steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo
 select exchangeName, tradePair, minPriceHikeStep, maxPriceHikeStep, minOfMaxTimeForStep, 
 maxOfMaxTimeForStep, totalDurationOfAllStepsInHrs, minAvgPriceUSD, maxAvgPriceUSD, minAvgPriceBTC,
 maxAvgPriceBTC, avgBuyHistoryAmount, avgOpenBuyAmount, minShortestTimeFromMin, maxShortestTimeFromMax,
 (case @previousTradePair = CONCAT(exchangeName, tradePair) 
 WHEN true then @stepDiffPreviousTwoMins := minPriceHikeStep - @previousMinStep
 WHEN false then @stepDiffPreviousTwoMins := 0 END) as stepDiffLastTwoMins,
-(@previousMinStep := minPriceHikeStep) as lastMaxStep,
-(@previousTradePair := CONCAT(exchangeName, tradePair)) as lastTradePair
-from steepHikeStepDurationsMinMax 
-JOIN (select @stepDiffPreviousTwoMins := 0,@previousMinStep := 0, @previousTradePair := "none") t;
-
-ALTER TABLE steepHikeStepDurationsMinMaxWLastStepDiff ADD INDEX exchangePair (exchangeName, tradePair);
-
- select * from steepHikeStepDurationsMinMaxWLastStepDiff 
- where (maxPriceHikeStep - minPriceHikeStep)/ minPriceHikeStep > 0.3
- AND stepDiffLastTwoMins > 2;
- 
-CREATE TABLE steepHikeStepDurationsMinMaxWLastSpikeInfo (
-	exchangeName VARCHAR(15) NULL,
-	tradePair VARCHAR(20) NULL,
-	minPriceHikeStep FLOAT NULL,
-    maxPriceHikeStep FLOAT NULL,
-    minOfMaxTimeForStep DATETIME NULL,
-    maxOfMaxTimeForStep DATETIME NULL,
-	totalDurationOfAllStepsInHrs FLOAT NULL,
-    minAvgPriceUSD FLOAT NULL,
-	maxAvgPriceUSD FLOAT NULL,
-    minAvgPriceBTC FLOAT NULL,
-	maxAvgPriceBTC FLOAT NULL,
-    avgBuyHistoryAmount FLOAT NULL,
-    avgOpenBuyAmount FLOAT NULL,
-	minShortestTimeFromMin FLOAT NULL,
-    maxShortestTimeFromMax FLOAT NULL,
-    stepDiffLastTwoMins FLOAT NULL,
-	lastMaxStep FLOAT NULL,
-	timeSinceLastSpike FLOAT NULL,
-    lastMaxTime DATETIME NULL,
-    lastTradePair  VARCHAR(50) NULL
-    );
-    
-INSERT into  steepHikeStepDurationsMinMaxWLastSpikeInfo
-select exchangeName, tradePair, minPriceHikeStep, maxPriceHikeStep, minOfMaxTimeForStep, 
-maxOfMaxTimeForStep, totalDurationOfAllStepsInHrs, minAvgPriceUSD, maxAvgPriceUSD, minAvgPriceBTC,
-maxAvgPriceBTC, avgBuyHistoryAmount, avgOpenBuyAmount, minShortestTimeFromMin, maxShortestTimeFromMax,
-stepDiffLastTwoMins, lastMaxStep,
 (case @previousTradePair = CONCAT(exchangeName, tradePair) 
 WHEN true then @timeSincePreviousSpike := ROUND(time_to_sec(timediff(minOfMaxTimeForStep, @lastMaxTime)) / 3600, 2)
 WHEN false then @timeSincePreviousSpike := 0 END) as timeSinceLastSpike, 
+(@previousMinStep := minPriceHikeStep) as lastMaxStep,
 (@lastMaxTime := maxOfMaxTimeForStep) as lastMaxTime,
 (@previousTradePair := CONCAT(exchangeName, tradePair)) as lastTradePair
-from 
-( select * from steepHikeStepDurationsMinMaxWLastStepDiff 
- where (maxPriceHikeStep - minPriceHikeStep)/ minPriceHikeStep > 0.3
- AND stepDiffLastTwoMins > 2) steepHikeStepDurationsMinMaxWLastStepDiffTemp
-JOIN (select @timeSincePreviousSpike := 0, @lastMaxTime := '2017-10-01 00:00:00', @previousTradePair := "none") t;
+from steepHikeStepsMinMaxWMinimumHeight
+JOIN (select @stepDiffPreviousTwoMins := 0,@previousMinStep := 0, 
+@timeSincePreviousSpike := 0, @lastMaxTime := '2017-10-01 00:00:00', @previousTradePair := "none") t;
+    
+select count(DISTINCT(CONCAT(exchangeName, tradePair))) from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo;
 
-ALTER TABLE steepHikeStepDurationsMinMaxWLastSpikeInfo ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo ADD INDEX exchangePair (exchangeName, tradePair);
 
-select * from steepHikeStepDurationsMinMaxWLastSpikeInfo where timeSinceLastSpike > 0 
-AND timeSinceLastSpike < 24;
- 
+select count(DISTINCT(CONCAT(exchangeName, tradePair))) from  
+(select * from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo where stepDiffLastTwoMins >= 2) t;
+
+select * from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo; 
+
+select * from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo where stepDiffLastTwoMins >= 2; 
+
 -- del
 
-drop table steepHikeStepDurations;
-CREATE TABLE steepHikeStepDurations (
-	exchangeName VARCHAR(15) NULL,
-	tradePair VARCHAR(20) NULL,
-	priceHikeStep FLOAT NULL,
-	priceStepDurationInHrs FLOAT NULL,
-	avgPriceUSD FLOAT NULL,
-	avgPriceBTC FLOAT NULL,
-    buyHistoryAmount FLOAT NULL,
-    openBuyAmount FLOAT NULL,
-    maxTimeForStep DATETIME NULL,
-	shortestTimeFromMin FLOAT NULL,
-    shortestTimeFromMax FLOAT NULL
-);
-
-
-INSERT into steepHikeStepDurations
-select exchangeName, tradePair , priceHikeStep, priceStepDurationInHrs, avgPriceUSD, 
-avgPriceBTC, buyHistoryAmount , openBuyAmount , maxTimeForStep, shortestTimeFromMin, shortestTimeFromMax
-from hikeStepDurations where priceStepDurationInHrs <= 3;
