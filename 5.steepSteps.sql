@@ -130,8 +130,10 @@ CREATE TABLE  steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo (
     avgOpenBuyAmount FLOAT NULL,
 	minShortestTimeFromMin FLOAT NULL,
     maxShortestTimeFromMax FLOAT NULL,
-    stepDiffLastTwoMins FLOAT NULL,
+    percDiffLastTwoMins FLOAT NULL,
+	percDiffLastTwoMaxs FLOAT NULL,
 	timeSinceLastSpike FLOAT NULL,
+	lastMinStep FLOAT NULL,
 	lastMaxStep FLOAT NULL,
     lastMaxTime DATETIME NULL,
     lastTradePair  VARCHAR(50) NULL
@@ -143,28 +145,57 @@ select exchangeName, tradePair, minPriceHikeStep, maxPriceHikeStep, minOfMaxTime
 maxOfMaxTimeForStep, totalDurationOfAllStepsInHrs, minAvgPriceUSD, maxAvgPriceUSD, minAvgPriceBTC,
 maxAvgPriceBTC, avgBuyHistoryAmount, avgOpenBuyAmount, minShortestTimeFromMin, maxShortestTimeFromMax,
 (case @previousTradePair = CONCAT(exchangeName, tradePair) 
-WHEN true then @stepDiffPreviousTwoMins := minPriceHikeStep - @previousMinStep
-WHEN false then @stepDiffPreviousTwoMins := 0 END) as stepDiffLastTwoMins,
+WHEN true then @stepDiffPreviousTwoMins := ROUND(((minPriceHikeStep/10+1) - (@previousMinStep/10+1))/(@previousMinStep/10+1)*100, 2)
+WHEN false then @stepDiffPreviousTwoMins := 0 END) as percDiffLastTwoMins,
+(case @previousTradePair = CONCAT(exchangeName, tradePair) 
+WHEN true then @stepDiffPreviousTwoMaxs := ROUND(((maxPriceHikeStep/10+1) - (@previousMaxStep/10+1))/(@previousMaxStep/10+1)*100, 2)
+WHEN false then @stepDiffPreviousTwoMaxs := 0 END) as percDiffLastTwoMaxs,
 (case @previousTradePair = CONCAT(exchangeName, tradePair) 
 WHEN true then @timeSincePreviousSpike := ROUND(time_to_sec(timediff(minOfMaxTimeForStep, @lastMaxTime)) / 3600, 2)
 WHEN false then @timeSincePreviousSpike := 0 END) as timeSinceLastSpike, 
-(@previousMinStep := minPriceHikeStep) as lastMaxStep,
+(@previousMinStep := minPriceHikeStep) as lastMinStep,
+(@previousMaxStep := maxPriceHikeStep) as lastMaxStep,
 (@lastMaxTime := maxOfMaxTimeForStep) as lastMaxTime,
 (@previousTradePair := CONCAT(exchangeName, tradePair)) as lastTradePair
 from steepHikeStepsMinMaxWMinimumHeight
-JOIN (select @stepDiffPreviousTwoMins := 0,@previousMinStep := 0, 
+JOIN (select @stepDiffPreviousTwoMins := 0,@previousMinStep := 0, @stepDiffPreviousTwoMaxs := 0,@previousMaxStep := 0, 
 @timeSincePreviousSpike := 0, @lastMaxTime := '2017-10-01 00:00:00', @previousTradePair := "none") t;
-    
-select count(DISTINCT(CONCAT(exchangeName, tradePair))) from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo;
 
 ALTER TABLE steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo ADD INDEX exchangePair (exchangeName, tradePair);
 
+select count(DISTINCT(CONCAT(exchangeName, tradePair))) from steepHikeStepDurationsMinMax;    
+select count(DISTINCT(CONCAT(exchangeName, tradePair))) from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo;
 select count(DISTINCT(CONCAT(exchangeName, tradePair))) from  
 (select * from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo where stepDiffLastTwoMins >= 2) t;
 
 select * from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo; 
 
-select * from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo where stepDiffLastTwoMins >= 2; 
+select * from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo where percDiffLastTwoMaxs >= 30; 
 
+select DISTINCT(CONCAT(exchangeName, tradePair)) from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo;
+
+select DISTINCT(CONCAT(exchangeName, tradePair)) from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo where percDiffLastTwoMaxs >= 30;
+
+select DISTINCT(CONCAT(exchangeName, tradePair)) from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo where CONCAT(exchangeName, tradePair) NOT IN
+(select DISTINCT(CONCAT(exchangeName, tradePair)) from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo where percDiffLastTwoMaxs >= 30);
+
+select * from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo where CONCAT(exchangeName, tradePair) IN
+(select DISTINCT(CONCAT(exchangeName, tradePair)) from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo where percDiffLastTwoMaxs >= 30);
+
+select * from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo where CONCAT(exchangeName, tradePair) NOT IN
+(select DISTINCT(CONCAT(exchangeName, tradePair)) from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo where percDiffLastTwoMaxs >= 30);
+
+select * from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo where tradePair = 'BTC-MONA';
+select * from steepHikeStepDurationsWAdjTracker where tradePair = 'BTC-MONA';
+select * from steepHikeStepDurationsWAdjTracker where tradePair = 'BTC-GRS';
+select * from steepHikeStepDurationsWAdjTracker where tradePair = 'BTC-ZEN';
+select * from steepHikeStepDurationsWAdjTracker where tradePair = 'BTC-BCY';
+
+select DISTINCT(CONCAT(exchangeName, tradePair)) from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo where (CONCAT(exchangeName, tradePair)) NOT IN 
+(select DISTINCT(CONCAT(exchangeName, tradePair)) from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo where stepDiffLastTwoMins >= 2);
+
+select * from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo where tradePair = 'BTC-2GIVE';
+select * from steepHikeStepDurationsWAdjTracker where tradePair = 'BTC-2GIVE';
 -- del
 
+use pocu3;
