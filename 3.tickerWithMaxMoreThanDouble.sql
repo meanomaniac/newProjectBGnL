@@ -25,6 +25,7 @@ ALTER TABLE CCIntTicker ADD INDEX exchangePair (exchangeName, tradePair);
 
 select count(*) from CCIntTicker;
 
+SELECT * FROM CCIntTicker where tradePair = 'BTC-MONA';
 
 -- del
 -- 20 mins

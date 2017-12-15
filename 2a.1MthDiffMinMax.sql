@@ -528,6 +528,8 @@ SELECT count(*) FROM mthDiffMinMaxWithTradingInfo;
 
 select * from mthDiffMinMaxWithTradingInfo where tradePair = 'BTC-BCY' and exchangeName = 'bittrex';
 
+SELECT * FROM mthDiffMinMaxWithTradingInfo where tradePair = 'BTC-MONA';
+
 -- del 
 
 SELECT * FROM cTicker1MthHrMinMaxPlus60Minus60NoNull where recordDay < '2017-10-02 03:00:00';			

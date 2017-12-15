@@ -20,7 +20,9 @@ CREATE TABLE hikeStepDurations (
 	avgPriceUSD FLOAT NULL,
 	avgPriceBTC FLOAT NULL,
     buyHistoryAmount FLOAT NULL,
+    sellHistoryAmount FLOAT NULL,
     openBuyAmount FLOAT NULL,
+    openSellAmount FLOAT NULL,
     minTimeForStep DATETIME NULL,
     maxTimeForStep DATETIME NULL,
 	shortestTimeFromMin FLOAT NULL,
@@ -43,11 +45,15 @@ WHEN true then @priceStepCounterVar := @priceStepCounterVar +1
 WHEN false then @priceStepCounterVar := @priceStepCounterVar END) as priceHikeStepCounter,
 (@priceStepVar := FLOOR(((CCIntTickerTemp.askPriceUSD - mthDiffMinMaxWithTradingInfoTemp.minPriceUSD)
 /mthDiffMinMaxWithTradingInfoTemp.minPriceUSD*100)/10)) as priceHikeStep,
-ROUND(time_to_sec(timediff(max(CCIntTickerTemp.recordTime), min(CCIntTickerTemp.recordTime)))/3600, 2) as priceStepDurationHrs,
+-- the 0.25 added to the time in the column below is to account for the fact that the following without the 0.25 will always be 15 mins less 
+-- than the actual duration. So without the 0.25, a 15 min interval will come up as zero as the min and max for that interval are the same.
+(ROUND(time_to_sec(timediff(max(CCIntTickerTemp.recordTime), min(CCIntTickerTemp.recordTime)))/3600, 2) + 0.25) as priceStepDurationHrs,
 ROUND(avg(CCIntTickerTemp.askPriceUSD),2) as avgPriceUSD,
 ROUND(avg(CCIntTickerTemp.askPriceBTC),2) as avgPriceBTC,
 mthDiffMinMaxWithTradingInfoTemp.buyHistoryAmount,
+mthDiffMinMaxWithTradingInfoTemp.sellHistoryAmount,
 mthDiffMinMaxWithTradingInfoTemp.openBuyAmount,
+mthDiffMinMaxWithTradingInfoTemp.openSellAmount,
 min(CCIntTickerTemp.recordTime),
 max(CCIntTickerTemp.recordTime),
 time_to_sec(timediff(min(CCIntTickerTemp.recordTime), mthDiffMinMaxWithTradingInfoTemp.timeOfMin))/3600 as shortestTimeFromMin,
@@ -74,6 +80,9 @@ SELECT COUNT(*) FROM hikeStepDurations;
 SELECT COUNT(DISTINCT(tradePair)) FROM hikeStepDurations where buyHistoryAmount > 10;
 select priceHikeStep, priceStepDurationInHrs from hikeStepDurations where exchangeName ='bittrex' and tradePair = 'BTC-CLUB';
 
+SELECT exchangeName, tradePair, priceHikeStep, priceStepDurationInHrs, avgPriceUSD, buyHistoryAmount, maxTimeForStep
+ FROM hikeStepDurations where tradePair = 'BTC-CLUB';
+SELECT * FROM succesfulSpikes where tradePair = 'BTC-GRS';
 
 -- test
 CREATE TABLE stepMinMaxByDay (
@@ -121,7 +130,8 @@ ORDER By CONCAT(exchangeName, tradePair);
 
 SELECT COUNT(*) FROM hikeStepDurations where priceHikeStepDurationInHrs < 10 and priceHikeStep > 0 ;
 
-select priceHikeStep, priceHikeStepDurationInHrs from hikeStepDurations where exchangeName ='bittrex' and tradePair = 'BTC-CLUB';
+select priceHikeStep, priceHikeStepDurationInHrs from hikeStepDurations where exchangeName ='bittrex' and tradePair = 'BTC-BRX';
+
 
 
 -- ORDER BY CONCAT(CCIntTickerTemp.exchangeName, CCIntTickerTemp.tradePair, CCIntTickerTemp.recordTime);
