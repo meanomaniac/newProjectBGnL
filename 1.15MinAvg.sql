@@ -8,7 +8,7 @@ The other 2 tables: openOrders15MinAvg and orderHistory15MinAvg in the script ge
 of the other 2 tables recorded from the bot: openOrders and orderHistory.
 */
 
-use pocu3;
+use pocu4;
 
 describe cTicker;
 describe openOrders;

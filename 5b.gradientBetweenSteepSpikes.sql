@@ -1,4 +1,4 @@
-use pocu3;
+use pocu4;
 
 CREATE TABLE hikeStepDurationsWSteepHikesMarked LIKE hikeStepDurations;     
 
@@ -90,10 +90,13 @@ select * from
 /* below we are converting steps into actual approximate values before comparing for a change of atleast 30%. 
 Recall that steps are every 10% change from the min
 */
- where ((maxPriceHikeStep/10+1) - (minPriceHikeStep/10+1))/ (minPriceHikeStep/10+1) > 0.25) gradualSpikesTemp;
+ where ((maxPriceHikeStep/10+1) - (minPriceHikeStep/10+1))/ (minPriceHikeStep/10+1) >= 0.25) gradualSpikesTemp;
  
-select * from gradualSpikesWMinimumHeight LIMIT 1000;
+select * from gradualSpikesWMinimumHeight;
 
+select DISTINCT(CONCAT(exchangeName, tradePair)) from gradualSpikesWMinimumHeight;
 
+select DISTINCT(CONCAT(exchangeName, tradePair)) from gradualSpikesWMinimumHeight where CONCAT(exchangeName, tradePair)
+NOT in (select DISTINCT(CONCAT(exchangeName, tradePair)) from sustainedSpikesWLastSpikeInfo);
 
-use pocu3;
+use pocu4;

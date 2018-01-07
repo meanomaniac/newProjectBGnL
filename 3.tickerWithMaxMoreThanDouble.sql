@@ -3,7 +3,7 @@ This is the 3rd script. This creates a subset of the cTicker15MinAvgBTCPrice tab
 max is atleast double or more of that of the min
 */
 
-use pocu3;
+use pocu4;
 
 CREATE TABLE CCIntTicker (
 	exchangeName VARCHAR(15) NULL,

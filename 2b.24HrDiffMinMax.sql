@@ -1,4 +1,4 @@
-use pocu3;
+use pocu4;
 -- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- creating the max table
 CREATE TABLE cTicker24HrMax (
@@ -363,7 +363,7 @@ UPDATE cTicker24HrMinMaxPlus60NoNull SET priceUSDMaxPlus15 = maxPriceUSD where p
 UPDATE cTicker24HrMinMaxPlus60NoNull SET priceUSDMaxPlus30 = priceUSDMaxPlus15 where priceUSDMaxPlus30 IS NULL;
 UPDATE cTicker24HrMinMaxPlus60NoNull SET priceUSDMaxPlus45 = priceUSDMaxPlus30 where priceUSDMaxPlus45 IS NULL;
 UPDATE cTicker24HrMinMaxPlus60NoNull SET priceUSDMaxPlus60 = priceUSDMaxPlus45 where priceUSDMaxPlus60 IS NULL;
-use pocu3;
+use pocu4;
 
 
 CREATE TABLE cTicker24HrMinMaxPlus60Minus60 (
@@ -460,7 +460,7 @@ ALTER TABLE dayDiffMinMaxWithTradingInfo ADD INDEX exchangePair (exchangeName, t
 -- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- TEST 
-use pocu3;
+use pocu4;
 
 SELECT DISTINCT(tradePair) from dayDiffMinMaxWithTradingInfo where UPPER(tradePair) REGEXP "AV|888|BUCKS";
 

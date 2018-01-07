@@ -22,7 +22,7 @@ The above table is achieved stepwise with a new table generated for each of:
 of openOrders and ordeHistory from the previous script to add the the buys and sells history at the time of max 
 
 */
-use pocu3;
+use pocu4;
 -- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- creating the max table
 CREATE TABLE cTicker1MthHrMax (
@@ -369,7 +369,7 @@ UPDATE cTicker1MthHrMinMaxPlus60NoNull SET priceUSDMaxPlus15 = maxPriceUSD where
 UPDATE cTicker1MthHrMinMaxPlus60NoNull SET priceUSDMaxPlus30 = priceUSDMaxPlus15 where priceUSDMaxPlus30 IS NULL;
 UPDATE cTicker1MthHrMinMaxPlus60NoNull SET priceUSDMaxPlus45 = priceUSDMaxPlus30 where priceUSDMaxPlus45 IS NULL;
 UPDATE cTicker1MthHrMinMaxPlus60NoNull SET priceUSDMaxPlus60 = priceUSDMaxPlus45 where priceUSDMaxPlus60 IS NULL;
-use pocu3;
+use pocu4;
 
  -- the above may not be needed
 
@@ -466,7 +466,7 @@ select count(*) from mthDiffMinMaxWithTradingInfo;
 -- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- TEST 
-use pocu3;
+use pocu4;
 
 SELECT * FROM mthDiffMinMaxWithTradingInfo where recordDay < '2017-10-02 03:00:00';	
 

@@ -9,7 +9,7 @@ is greater than a certain value like 4. Instead of steps, the regular CCIntTicke
 hikeStepDurations is smaller than CCIntTicker so querying it ans tudying will be easier).
 */
 
-use pocu3;
+use pocu4;
 
 CREATE TABLE hikeStepDurations (
 	exchangeName VARCHAR(15) NULL,
