@@ -373,13 +373,14 @@ CREATE TABLE CCIntTickerGSTracker (
     diff1Wk FLOAT NULL,
     diff2Wk FLOAT NULL,
     diff4Wk FLOAT NULL,
-    gsMarker FLOAT NULL
+    gsMarker FLOAT NULL,
+    commonPtPrice FLOAT NULL
 );
 
 INSERT into CCIntTickerGSTracker
 select exchangeName, tradePair, askPriceUSD, askPriceBTC, recordTime, spikeStarts, 
 diff2Hr, diff4Hr, diff8Hr, diff16Hr, diff1Day, diff2Day, diff4Day, diff1Wk, diff2Wk, diff4Wk, 
-gsMarker from 
+gsMarker, commonPtPrice from 
 (select *, 
 (case 
  WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Hr >30) 	 then 2 
@@ -394,6 +395,19 @@ gsMarker from
  WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Wk >30) 	 then 4000 
 ELSE 0
 END) as gsMarker,
+(case 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Hr >30) 	 then askPriceUSD*100/(diff2Hr + 100) 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Hr >30) 	 then askPriceUSD*100/(diff4Hr + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff8Hr >30) 	 then askPriceUSD*100/(diff8Hr + 100) 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff16Hr >30) 	 then askPriceUSD*100/(diff16Hr + 100) 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff1Day >30) 	 then askPriceUSD*100/(diff1Day + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Day >30) 	 then askPriceUSD*100/(diff2Day + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Day >30) 	 then askPriceUSD*100/(diff4Day + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff1Wk >30) 	 then askPriceUSD*100/(diff1Wk + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Wk >30) 	 then askPriceUSD*100/(diff2Wk + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Wk >30) 	 then askPriceUSD*100/(diff4Wk + 100)  
+ELSE 0
+END) as commonPtPrice,
 (@previousTradePair := CONCAT(exchangeName, tradePair)) as lastTradePair
 from CCIntTickerOrdered
 JOIN (select @previousTradePair := "none") t) t2;
@@ -402,6 +416,66 @@ ALTER TABLE CCIntTickerGSTracker ADD INDEX exchangePair (exchangeName, tradePair
 
 select count(DISTINCT(CONCAT(exchangeName, tradePair))) from CCIntTickerGSTracker where gsMarker = 4;
 
+select * from CCIntTickerGSTracker limit 12000;
+
+CREATE TABLE CCIntTickerGSData (
+	exchangeName VARCHAR(15) NULL,
+	tradePair VARCHAR(20) NULL,
+	askPriceUSD FLOAT NULL,
+	askPriceBTC FLOAT NULL,
+	recordTime DATETIME NULL,
+    spikeStarts TINYINT(1) DEFAULT 0,
+    diff2Hr FLOAT NULL,
+    diff4Hr FLOAT NULL,
+    diff8Hr FLOAT NULL,
+    diff16Hr FLOAT NULL,
+    diff1Day FLOAT NULL,
+    diff2Day FLOAT NULL,
+    diff4Day FLOAT NULL,
+    diff1Wk FLOAT NULL,
+    diff2Wk FLOAT NULL,
+    diff4Wk FLOAT NULL,
+    gsMarker FLOAT NULL,
+    commonPtPrice FLOAT NULL,
+    diffCommonPt FLOAT NULL,
+    gsTracker FLOAT NULL
+);
+
+INSERT into CCIntTickerGSData
+select exchangeName, tradePair, askPriceUSD, askPriceBTC, recordTime, spikeStarts, 
+diff2Hr, diff4Hr, diff8Hr, diff16Hr, diff1Day, diff2Day, diff4Day, diff1Wk, diff2Wk, diff4Wk, 
+gsMarker, commonPtPrice, diffCommonPt, gsTracker from 
+(select *,
+(case 
+	WHEN @previousTradePair = CONCAT(exchangeName, tradePair) AND @gsTrackerWatcher != @commonPtPrice then @gsTrackerVar := @gsTrackerVar +1	-- odd numbers are gradual spikes, even numbers are not
+	WHEN @previousTradePair = CONCAT(exchangeName, tradePair) AND @gsTrackerWatcher = @commonPtPrice then @gsTrackerVar := @gsTrackerVar
+    ELSE @gsTrackerVar := 0
+END ) as gsTracker,
+( case
+	WHEN @previousTradePair = CONCAT(exchangeName, tradePair) then @gsTrackerWatcher := @commonPtPrice
+    ELSE @gsTrackerWatcher := 0
+END) as gsTrackerWatcher,
+(case 
+	WHEN @previousTradePair = CONCAT(exchangeName, tradePair) AND gsMarker !=0 AND  @commonPtPrice = 0 then @commonPtPrice := commonPtPrice
+    WHEN @previousTradePair = CONCAT(exchangeName, tradePair) AND (@percDiffCommonPt < 10 OR  spikeStarts = 1) AND @commonPtPrice != 0 then @commonPtPrice := 0
+    WHEN @previousTradePair != CONCAT(exchangeName, tradePair) then @commonPtPrice := 0
+    ELSE @commonPtPrice := @commonPtPrice
+END ) as commonPtPriceVar,
+(case @previousTradePair = CONCAT(exchangeName, tradePair) AND (gsMarker != 0 OR @commonPtPrice != 0)
+	WHEN true then @percDiffCommonPt := (askPriceUSD - @commonPtPrice)/@commonPtPrice*100
+    WHEN false then @percDiffCommonPt := 0
+END ) as diffCommonPt,
+@previousTradePair := CONCAT(exchangeName, tradePair) as exchTradePair
+from CCIntTickerGSTracker
+JOIN (select @previousTradePair := "none", @commonPtPrice :=0, @percDiffCommonPt := 0, @gsTrackerVar := 0, @gsTrackerWatcher := 0) t
+)t2 ;
+
+ALTER TABLE CCIntTickerGSData ADD INDEX exchangePair (exchangeName, tradePair);
+
+use pocu4;
+
+
+-- test
 select count(DISTINCT(CONCAT(exchangeName, tradePair))) from CCIntTickerGSTracker where CONCAT(exchangeName, tradePair, recordTime) in 
 (select DISTINCT(CONCAT(exchangeName, tradePair, recordTime)) from CCIntTickerGSTracker where gsMarker = 4) 
 and CONCAT(exchangeName, tradePair, recordTime) in 
@@ -412,6 +486,8 @@ select DISTINCT(CONCAT(exchangeName, tradePair, recordTime)) from CCIntTickerGST
 select CONCAT(exchangeName, tradePair) from CCIntTickerGSTracker group by  CONCAT(exchangeName, tradePair) ;
 
 select count(*) from 
+(
+select * from 
 (
 select t.tradePair, ts.minSpikeTime, t1.minTime as hr2, t2.minTime as hr4, t3.minTime as hr8, t4.minTime as hr16, t5.minTime as d1,
  t6.minTime as d2, t7.minTime as d4, t8.minTime as w1,  t9.minTime as w2, t10.minTime as w4
@@ -452,7 +528,20 @@ LEFT JOIN
 ON (t10.tradePair = t.tradePair)) tm
 where (hr2 <minSpikeTime or hr4 <minSpikeTime or hr8 <minSpikeTime or hr16 <minSpikeTime
 or d1 <minSpikeTime or d2 <minSpikeTime or d4 <minSpikeTime or w1 <minSpikeTime
-or w2 <minSpikeTime or w4 <minSpikeTime);
+or w2 <minSpikeTime or w4 <minSpikeTime)) tm2
+where (hr2 <minSpikeTime or hr4 <minSpikeTime or hr8 <minSpikeTime or hr16 <minSpikeTime
+or d1 <minSpikeTime or d2 <minSpikeTime or d4 <minSpikeTime or w1 <minSpikeTime
+or w2 <minSpikeTime or w4 <minSpikeTime) 
 
-use pocu4;
+
+and (w1 > minSpikeTime or w1 is null)
+and (d4 > minSpikeTime or d4 is null)
+and (d2 > minSpikeTime or d2 is null)
+and (d1 > minSpikeTime or d1 is null)
+and (hr16 > minSpikeTime or hr16 is null)
+and (hr8 > minSpikeTime or hr8 is null)
+and (hr4 > minSpikeTime or hr4 is null)
+and (hr2 > minSpikeTime or hr2 is null);
+
+
 -- del
