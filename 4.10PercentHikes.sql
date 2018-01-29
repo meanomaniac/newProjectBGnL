@@ -48,8 +48,8 @@ WHEN false then @priceStepCounterVar := @priceStepCounterVar END) as priceHikeSt
 -- the 0.25 added to the time in the column below is to account for the fact that the following without the 0.25 will always be 15 mins less 
 -- than the actual duration. So without the 0.25, a 15 min interval will come up as zero as the min and max for that interval are the same.
 (ROUND(time_to_sec(timediff(max(CCIntTickerTemp.recordTime), min(CCIntTickerTemp.recordTime)))/3600, 2) + 0.25) as priceStepDurationHrs,
-ROUND(avg(CCIntTickerTemp.askPriceUSD),2) as avgPriceUSD,
-ROUND(avg(CCIntTickerTemp.askPriceBTC),2) as avgPriceBTC,
+avg(CCIntTickerTemp.askPriceUSD) as avgPriceUSD,
+avg(CCIntTickerTemp.askPriceBTC) as avgPriceBTC,
 mthDiffMinMaxWithTradingInfoTemp.buyHistoryAmount,
 mthDiffMinMaxWithTradingInfoTemp.sellHistoryAmount,
 mthDiffMinMaxWithTradingInfoTemp.openBuyAmount,

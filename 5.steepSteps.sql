@@ -200,7 +200,7 @@ select * from steepHikeStepsMinMaxWMinimumHeightWLastSpikeInfo;
 /* the following table gets all spikes that a have peak of 25% more than the previous spike. It also includes these previous spikes
 that lead to these subsequent 25% higher spikes.  
  */
- 
+
 CREATE TABLE  potentiallySuccesfulSteepSpikes (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
@@ -303,6 +303,7 @@ where CONCAT(exchangeName, tradePair) NOT IN
 ALTER TABLE failedSteepSpikes ADD INDEX exchangePair (exchangeName, tradePair);
 
 select DISTINCT(CONCAT(exchangeName, tradePair))  from failedSteepSpikes;
+
 
 CREATE TABLE  potentiallySuccesfulSteepSpikesWithin24Hrs (
 	exchangeName VARCHAR(15) NULL,
