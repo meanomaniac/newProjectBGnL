@@ -646,38 +646,41 @@ and netPercHike < 500 and variance1WkPreGS < 1 and commonPtPreDiff < 100;
 select * from gsSpikeMetaData3 
 where
  -- netPercHike >= 100 and 
-relStdDev1WkPreGS < 8
-and commonPtTime > '2017-10-08 23:59:59'
-and CONCAT(exchangeName, tradePair) = 'bittrexBTC-DYN'
+-- relStdDev1WkPreGS > 7.5 and 
+ -- commonPtTime < '2017-10-08 23:59:59' and commonPtTime > '2017-10-01 23:59:59' AND
 -- and
  -- maxGSPrice > minGSPrice
  -- increase threshold from 30 to higher
  -- ensure u wait weeks after a big spike
-and netPercHike < 50
-  and preThresholdDurOrGSMarker >= 48
-  -- and commonPtPreDiff < 30
+-- netPercHike < 50 and
+  preThresholdDurOrGSMarker >= 16
+  and exchangeName NOT IN ('yoBit', 'novaexchange', 'livecoin')
+  and  commonPtPreDiff < 25
  and CONCAT(exchangeName, tradePair) NOT IN 
  (select CONCAT(exchangeName, tradePair) from gsSpikeMetaData2 where netPercHike > 50)
+ 
   order by netPercHike desc;
-
+  
+  
 select DISTINCT (CONCAT(exchangeName, tradePair)) from gsSpikeMetaData3 
 where
  -- netPercHike >= 100 and 
--- relStdDev1WkPreGS < 8 and 
- commonPtTime > '2017-10-08 23:59:59' and
+ -- relStdDev1WkPreGS < 11 and 
+-- commonPtTime < '2017-10-08 23:59:59' and  commonPtTime > '2017-10-01 23:59:59' AND
 -- and
  -- maxGSPrice > minGSPrice
  -- increase threshold from 30 to higher
  -- ensure u wait weeks after a big spike
- netPercHike < 50
-  and preThresholdDurOrGSMarker >= 48
-  and exchangeName NOT IN ('yoBit', 'novaexchange')
-  and  commonPtPreDiff < 30
+-- netPercHike < 50 and
+  preThresholdDurOrGSMarker >= 16
+  and exchangeName NOT IN ('yoBit', 'novaexchange', 'livecoin')
+  and  commonPtPreDiff < 19
  and CONCAT(exchangeName, tradePair) NOT IN 
  (select CONCAT(exchangeName, tradePair) from gsSpikeMetaData2 where netPercHike > 50)
+ 
   order by netPercHike desc;
  
- select DISTINCT (CONCAT(exchangeName, tradePair)) from gsSpikeMetaData2 where netPercHike >= 100 and commonPtPreDiff < 20 and exchangeName NOT IN ('yoBit', 'novaexchange') and relStdDev1WkPreGS < 8 order by netPercHike desc ;
+select DISTINCT (CONCAT(exchangeName, tradePair)) from gsSpikeMetaData3 where netPercHike >= 50 and commonPtPreDiff < 19 and preThresholdDurOrGSMarker >= 16 and exchangeName NOT IN ('yoBit', 'novaexchange', 'livecoin')  order by netPercHike desc ;
  
 select * from gsSpikeMetaData2 where totalDuration >= 100 and commonPtPreDiff < 20 order by netPercHike desc;
 
