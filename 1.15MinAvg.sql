@@ -65,11 +65,13 @@ CREATE TABLE openOrders15MinAvg (
 INSERT INTO openOrders15MinAvg
 SELECT exchangeName, tradePair, FROM_UNIXTIME((UNIX_TIMESTAMP(recordTime)) div 900*900 + 900) as timeRecorded,
 avg(totalBuyAmount) as avgTotalBuyAmount, avg(totalSellAmount) as avgTotalSellAmount
-from openOrders
+-- from openOrders where recordTime < '2017-11-08 00:00:00'
 GROUP BY tradePair, exchangeName, timeRecorded ORDER BY timeRecorded, tradePair;
  
 -- took 10 secs
 ALTER TABLE openOrders15MinAvg ADD INDEX exchangePair (exchangeName, tradePair);
+
+update  openOrders15MinAvg set tradePair = CONCAT(SUBSTRING_INDEX(tradePair, '_', 1), '/', SUBSTRING_INDEX(tradePair, '_', -1)) where exchangeName = 'cryptopia';
 
 select count(*) from openOrders15MinAvg;
 select * from openOrders15MinAvg where recordTime < '2017-10-01 03:00:00' ;

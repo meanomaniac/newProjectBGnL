@@ -611,6 +611,77 @@ group by CONCAT(t1.exchangeName, t1.tradePair, t1.gsTracker);
 
 ALTER TABLE gsSpikeMetaData3 ADD INDEX exchangePair (exchangeName, tradePair);
 
+select t7.exchangeName, t7.tradePair, t7.gsTracker, t7.preThresholdDurOrGSMarker, 
+t7.postThresholdDuration, t7.totalDuration, 
+t7.commonPtTime, t7.minGSTime, t7.maxGSTime, t7.minSpikeTime, 
+t7.minGSPrice, t7.maxGSPrice, t7.netPercHike, t7.commonPtPrice,
+t7.maxFirst48hPrice, t7.first48hmaxPercChange,
+t7.relStdDev1WkPreGS, t7.relVariance1WkPreGS, t7.commonPtPreDiff,
+t7.maxPricePostGS, t7.maxPricePostGSTime, 
+t7.minGSMaxBuy, t7.minGSMaxSell,
+t8.totalBuyAmount as maxGSMaxBuy, t8.totalSellAmount as maxGSMaxSell
+ from 
+(
+select t5.exchangeName, t5.tradePair, t5.gsTracker, t5.preThresholdDurOrGSMarker, 
+t5.postThresholdDuration, t5.totalDuration, 
+t5.commonPtTime, t5.minGSTime, t5.maxGSTime, t5.minSpikeTime, 
+t5.minGSPrice, t5.maxGSPrice, t5.netPercHike, t5.commonPtPrice,
+t5.maxFirst48hPrice, t5.first48hmaxPercChange,
+t5.relStdDev1WkPreGS, t5.relVariance1WkPreGS, t5.commonPtPreDiff,
+t5.minGSMaxBuy, t5.minGSMaxSell,
+t5.maxPricePostGS, t6.recordTime as maxPricePostGSTime from
+(
+select t3.exchangeName, t3.tradePair, t3.gsTracker, t3.preThresholdDurOrGSMarker, 
+t3.postThresholdDuration, t3.totalDuration, 
+t3.commonPtTime, t3.minGSTime, t3.maxGSTime, t3.minSpikeTime, 
+t3.minGSPrice, t3.maxGSPrice, t3.netPercHike, t3.commonPtPrice,
+t3.maxFirst48hPrice, t3.first48hmaxPercChange,
+t3.relStdDev1WkPreGS, t3.relVariance1WkPreGS, t3.commonPtPreDiff, 
+t3.minGSMaxBuy, t3.minGSMaxSell, max(t4.askPriceUSD) as maxPricePostGS
+
+from 
+(
+select t1.exchangeName, t1.tradePair, t1.gsTracker, t1.preThresholdDurOrGSMarker, 
+t1.postThresholdDuration, t1.totalDuration, 
+t1.commonPtTime, t1.minGSTime, t1.maxGSTime, t1.minSpikeTime, 
+t1.minGSPrice, t1.maxGSPrice, t1.netPercHike, t1.commonPtPrice,
+t1.maxFirst48hPrice, t1.first48hmaxPercChange,
+t1.relStdDev1WkPreGS, t1.relVariance1WkPreGS, t1.commonPtPreDiff, 
+max(t2.totalBuyAmount) as minGSMaxBuy, max(t2.totalSellAmount) as minGSMaxSell
+from gsSpikeMetaData3 as t1
+LEFT JOIN openOrders15MinAvg as t2 ON (t2.exchangeName = t1.exchangeName AND
+																	t2.tradePair = t1.tradePair AND
+																	t2.recordTime >=  FROM_UNIXTIME((UNIX_TIMESTAMP(t1.minGSTime)) - 900) AND
+																	t2.recordTime <= FROM_UNIXTIME((UNIX_TIMESTAMP(t1.minGSTime)) + 900 )
+																	)                                                                    
+-- where  t1.preThresholdDuration >=8 and t1.netPercHike > 25                                                                    
+group by CONCAT(t1.exchangeName, t1.tradePair, t1.gsTracker)
+) as t3
+LEFT JOIN CCIntTickerGSData as t4 ON (t4.exchangeName = t3.exchangeName AND
+																	t4.tradePair = t3.tradePair AND
+																	t4.recordTime >=  t3.minGSTime
+																	)                                                                    
+-- where  t1.preThresholdDuration >=8 and t1.netPercHike > 25                                                                    
+group by CONCAT(t3.exchangeName, t3.tradePair, t3.gsTracker)
+) as t5 
+LEFT JOIN CCIntTickerGSData as t6 ON (t6.exchangeName = t5.exchangeName AND
+																	t6.tradePair = t5.tradePair AND
+																	t6.askPriceUSD =  t5.maxPricePostGS
+																	)                                                                    
+-- where  t1.preThresholdDuration >=8 and t1.netPercHike > 25                                                                    
+group by CONCAT(t5.exchangeName, t5.tradePair, t5.gsTracker)
+) as t7
+LEFT JOIN openOrders15MinAvg as t8 ON (t8.exchangeName = t7.exchangeName AND
+																	t8.tradePair = t7.tradePair AND
+																	t8.recordTime =  t7.maxPricePostGSTime
+																	)                                                                    
+-- where  t1.preThresholdDuration >=8 and t1.netPercHike > 25                                                                    
+group by CONCAT(t7.exchangeName, t7.tradePair, t7.gsTracker)
+;
+
+
+
+use pocu4;
 -- 
 select netPercHike from gsSpikeMetaData2 where netPercHike < 500 
 -- and preThresholdDurOrGSMarker >=4  
