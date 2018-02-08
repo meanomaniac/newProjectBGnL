@@ -611,6 +611,35 @@ group by CONCAT(t1.exchangeName, t1.tradePair, t1.gsTracker);
 
 ALTER TABLE gsSpikeMetaData3 ADD INDEX exchangePair (exchangeName, tradePair);
 
+create table gsSpikeMetaData4 (
+	exchangeName VARCHAR(15) NULL,
+	tradePair VARCHAR(20) NULL,
+    gsTracker FLOAT NULL,
+    preThresholdDurOrGSMarker FLOAT NULL,
+	postThresholdDuration FLOAT NULL,
+    totalDuration FLOAT NULL,
+    commonPtTime DATETIME NULL,
+    minGSTime DATETIME NULL,
+    maxGSTime DATETIME NULL,
+    minSpikeTime DATETIME NULL,
+    minGSPrice FLOAT NULL,
+    maxGSPrice FLOAT NULL,
+    netPercHike FLOAT NULL,
+    commonPtPrice FLOAT NULL,
+    maxFirst48hPrice FLOAT NULL,
+    first48hmaxPercChange FLOAT NULL,
+    relStdDev1WkPreGS FLOAT NULL,
+    relVariance1WkPreGS FLOAT NULL,
+    commonPtPreDiff FLOAT NULL,
+    maxPricePostGS FLOAT NULL,
+    maxPricePostGSTime FLOAT NULL,
+    minGSMaxBuy FLOAT NULL,
+    minGSMaxSell FLOAT NULL,
+    maxGSMaxBuy FLOAT NULL,
+    maxGSMaxSell FLOAT NULL
+);
+
+INSERT into gsSpikeMetaData4
 select t7.exchangeName, t7.tradePair, t7.gsTracker, t7.preThresholdDurOrGSMarker, 
 t7.postThresholdDuration, t7.totalDuration, 
 t7.commonPtTime, t7.minGSTime, t7.maxGSTime, t7.minSpikeTime, 
@@ -679,9 +708,125 @@ LEFT JOIN openOrders15MinAvg as t8 ON (t8.exchangeName = t7.exchangeName AND
 group by CONCAT(t7.exchangeName, t7.tradePair, t7.gsTracker)
 ;
 
+select * from gsSpikeMetaData4;
 
+ALTER TABLE gsSpikeMetaData4 ADD INDEX exchangePair (exchangeName, tradePair);
+
+create table gsSpikeMetaData5 (
+	exchangeName VARCHAR(15) NULL,
+	tradePair VARCHAR(20) NULL,
+    symbol VARCHAR(20) NULL,
+    gsTracker FLOAT NULL,
+    preThresholdDurOrGSMarker FLOAT NULL,
+	postThresholdDuration FLOAT NULL,
+    totalDuration FLOAT NULL,
+    commonPtTime DATETIME NULL,
+    minGSTime DATETIME NULL,
+    maxGSTime DATETIME NULL,
+    minSpikeTime DATETIME NULL,
+    minGSPrice FLOAT NULL,
+    maxGSPrice FLOAT NULL,
+    netPercHike FLOAT NULL,
+    commonPtPrice FLOAT NULL,
+    maxFirst48hPrice FLOAT NULL,
+    first48hmaxPercChange FLOAT NULL,
+    relStdDev1WkPreGS FLOAT NULL,
+    relVariance1WkPreGS FLOAT NULL,
+    commonPtPreDiff FLOAT NULL,
+    maxPricePostGS FLOAT NULL,
+    maxPricePostGSTime FLOAT NULL,
+    minGSMaxBuy FLOAT NULL,
+    minGSMaxSell FLOAT NULL,
+    maxGSMaxBuy FLOAT NULL,
+    maxGSMaxSell FLOAT NULL
+);
+
+insert into gsSpikeMetaData5
+select t7.exchangeName, t7.tradePair, 
+(case 
+	WHEN exchangeName = "bittrex" then SUBSTRING_INDEX(tradePair, "-", -1)
+    WHEN exchangeName = "cryptopia" then SUBSTRING_INDEX(tradePair, "/", 1)
+	WHEN exchangeName = "hitBTC" and tradePair LIKE '%USD' then LEFT(tradePair, LENGTH(tradePair) - 3)
+	WHEN exchangeName = "hitBTC" and tradePair LIKE '%ETH' then LEFT(tradePair, LENGTH(tradePair) - 3)
+    WHEN exchangeName = "hitBTC" and tradePair LIKE '%BTC' then LEFT(tradePair, LENGTH(tradePair) - 3)
+    WHEN exchangeName = "livecoin" then SUBSTRING_INDEX(tradePair, "/", 1)
+    WHEN exchangeName = "novaexchange" then SUBSTRING_INDEX(tradePair, "_", -1)
+    WHEN exchangeName = "yoBit" then SUBSTRING_INDEX(tradePair, "_", 1)
+    WHEN exchangeName = "poloniex" then SUBSTRING_INDEX(tradePair, "_", -1)
+END ) as symbol, 
+t7.gsTracker, t7.preThresholdDurOrGSMarker, 
+t7.postThresholdDuration, t7.totalDuration, 
+t7.commonPtTime, t7.minGSTime, t7.maxGSTime, t7.minSpikeTime, 
+t7.minGSPrice, t7.maxGSPrice, t7.netPercHike, t7.commonPtPrice,
+t7.maxFirst48hPrice, t7.first48hmaxPercChange,
+t7.relStdDev1WkPreGS, t7.relVariance1WkPreGS, t7.commonPtPreDiff,
+t7.maxPricePostGS, t7.maxPricePostGSTime, 
+t7.minGSMaxBuy, t7.minGSMaxSell, t7.maxGSMaxBuy, t7.maxGSMaxSell
+from gsSpikeMetaData4 as t7;
+
+ALTER TABLE gsSpikeMetaData5 ADD INDEX exchangePair (exchangeName, tradePair);
+
+create table gsSpikeMetaData6 (
+	exchangeName VARCHAR(15) NULL,
+	tradePair VARCHAR(20) NULL,
+    symbol VARCHAR(20) NULL,
+    gsTracker FLOAT NULL,
+    preThresholdDurOrGSMarker FLOAT NULL,
+	postThresholdDuration FLOAT NULL,
+    totalDuration FLOAT NULL,
+    commonPtTime DATETIME NULL,
+    minGSTime DATETIME NULL,
+    maxGSTime DATETIME NULL,
+    minSpikeTime DATETIME NULL,
+    minGSPrice FLOAT NULL,
+    maxGSPrice FLOAT NULL,
+    netPercHike FLOAT NULL,
+    commonPtPrice FLOAT NULL,
+    maxFirst48hPrice FLOAT NULL,
+    first48hmaxPercChange FLOAT NULL,
+    relStdDev1WkPreGS FLOAT NULL,
+    relVariance1WkPreGS FLOAT NULL,
+    commonPtPreDiff FLOAT NULL,
+    maxPricePostGS FLOAT NULL,
+    maxPricePostGSTime FLOAT NULL,
+    minGSMaxBuy FLOAT NULL,
+    minGSMaxSell FLOAT NULL,
+    maxGSMaxBuy FLOAT NULL,
+    maxGSMaxSell FLOAT NULL,
+	volume24hUSD FLOAT NULL,
+	marketCapUSD FLOAT NULL
+);
+
+insert into gsSpikeMetaData6
+select t7.exchangeName, t7.tradePair, t7.symbol, 
+t7.gsTracker, t7.preThresholdDurOrGSMarker, 
+t7.postThresholdDuration, t7.totalDuration, 
+t7.commonPtTime, t7.minGSTime, t7.maxGSTime, t7.minSpikeTime, 
+t7.minGSPrice, t7.maxGSPrice, t7.netPercHike, t7.commonPtPrice,
+t7.maxFirst48hPrice, t7.first48hmaxPercChange,
+t7.relStdDev1WkPreGS, t7.relVariance1WkPreGS, t7.commonPtPreDiff,
+t7.maxPricePostGS, t7.maxPricePostGSTime, 
+t7.minGSMaxBuy, t7.minGSMaxSell, t7.maxGSMaxBuy, t7.maxGSMaxSell,
+t1.volume_24h_usd, t1.market_cap_usd
+from gsSpikeMetaData5 as t7
+
+LEFT JOIN marketCapNVolume as t1 ON (t1.symbol = t7.symbol) ;
+
+ALTER TABLE gsSpikeMetaData6 ADD INDEX exchangePair (exchangeName, tradePair);
 
 use pocu4;
+
+
+
+
+
+
+
+
+
+
+
+
 -- 
 select netPercHike from gsSpikeMetaData2 where netPercHike < 500 
 -- and preThresholdDurOrGSMarker >=4  
@@ -1093,8 +1238,7 @@ ALTER TABLE CCIntTickerGSDataWMaxPeakTime ADD INDEX exchangePair (exchangeName, 
 
 select * from CCIntTickerGSDataWMaxPeakTime limit 10000; 
 
-select * from 
-(select t1.exchangeName, t1.tradePair, t1.gsTracker, t1.preThresholdDurOrGSMarker, 
+select t1.exchangeName, t1.tradePair, t1.gsTracker, t1.preThresholdDurOrGSMarker, 
 t1.postThresholdDuration, t1.totalDuration, 
 t1.commonPtTime, t1.minGSTime, t1.maxGSTime, t1.minSpikeTime, 
 t1.minGSPrice, t1.maxGSPrice, t1.netPercHike, t1.commonPtPrice,

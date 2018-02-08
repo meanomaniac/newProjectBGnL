@@ -94,6 +94,19 @@ GROUP BY tradePair, exchangeName, timeRecorded ORDER BY timeRecorded, tradePair;
 -- took 9.5 secs
 ALTER TABLE orderHistory15MinAvg ADD INDEX exchangePair (exchangeName, tradePair);
 
+CREATE TABLE marketCapNVolume (
+	symbol VARCHAR(25) NULL,
+	volume_24h_usd FLOAT NULL,
+	market_cap_usd FLOAT NULL
+);
+
+select * from marketCapNVolume;
+
+ALTER TABLE marketCapNVolume ADD INDEX exchangePair (exchangeName, tradePair);
+
+
+-- test
+use pocu4;
 select count(*) from orderHistory15MinAvg;
 select * from orderHistory15MinAvg where recordTime < '2017-10-01 03:00:00' ;
 
