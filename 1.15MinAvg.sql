@@ -94,6 +94,7 @@ GROUP BY tradePair, exchangeName, timeRecorded ORDER BY timeRecorded, tradePair;
 -- took 9.5 secs
 ALTER TABLE orderHistory15MinAvg ADD INDEX exchangePair (exchangeName, tradePair);
 
+/* be very cautious using the below table as symbols do repeat */
 CREATE TABLE marketCapNVolume (
 	symbol VARCHAR(25) NULL,
 	volume_24h_usd FLOAT NULL,
@@ -101,9 +102,17 @@ CREATE TABLE marketCapNVolume (
 );
 
 select * from marketCapNVolume;
+select * from 
+(
+select symbol, count(*) as symCount from marketCapNVolume group by symbol 
+order by symCount DESC
+) t
+where symCount > 1;
 
 ALTER TABLE marketCapNVolume ADD INDEX exchangePair (exchangeName, tradePair);
 
+select symbol, min(volume_24h_usd) as volume_24h_usd, min(market_cap_usd) as market_cap_usd
+from marketCapNVolume group by symbol;
 
 -- test
 use pocu4;
