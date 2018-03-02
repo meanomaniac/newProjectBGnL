@@ -385,29 +385,29 @@ diff2Hr, diff4Hr, diff8Hr, diff16Hr, diff1Day, diff2Day, diff4Day, diff1Wk, diff
 gsMarker, commonPtPrice from 
 (select *, 
 (case 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Hr >30) 	 then 2 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Hr >30) 	 then 4 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff8Hr >30) 	 then 8 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff16Hr >30) 	 then 16 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff1Day >30) 	 then 24 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Day >30) 	 then 48 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Day >30) 	 then 96 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff1Wk >30) 	 then 168 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Wk >30) 	 then 336 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Wk >30) 	 then 672 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Hr >35) 	 then 2 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Hr >35) 	 then 4 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff8Hr >35) 	 then 8 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff16Hr >35) 	 then 16 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff1Day >35) 	 then 24 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Day >35) 	 then 48 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Day >35) 	 then 96 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff1Wk >35) 	 then 168 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Wk >35) 	 then 336 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Wk >35) 	 then 672 
 ELSE 0
 END) as gsMarker,
 (case 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Hr >30) 	 then askPriceUSD*100/(diff2Hr + 100) 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Hr >30) 	 then askPriceUSD*100/(diff4Hr + 100)  
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff8Hr >30) 	 then askPriceUSD*100/(diff8Hr + 100) 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff16Hr >30) 	 then askPriceUSD*100/(diff16Hr + 100) 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff1Day >30) 	 then askPriceUSD*100/(diff1Day + 100)  
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Day >30) 	 then askPriceUSD*100/(diff2Day + 100)  
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Day >30) 	 then askPriceUSD*100/(diff4Day + 100)  
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff1Wk >30) 	 then askPriceUSD*100/(diff1Wk + 100)  
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Wk >30) 	 then askPriceUSD*100/(diff2Wk + 100)  
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Wk >30) 	 then askPriceUSD*100/(diff4Wk + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Hr >35) 	 then askPriceUSD*100/(diff2Hr + 100) 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Hr >35) 	 then askPriceUSD*100/(diff4Hr + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff8Hr >35) 	 then askPriceUSD*100/(diff8Hr + 100) 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff16Hr >35) 	 then askPriceUSD*100/(diff16Hr + 100) 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff1Day >35) 	 then askPriceUSD*100/(diff1Day + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Day >35) 	 then askPriceUSD*100/(diff2Day + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Day >35) 	 then askPriceUSD*100/(diff4Day + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff1Wk >35) 	 then askPriceUSD*100/(diff1Wk + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Wk >35) 	 then askPriceUSD*100/(diff2Wk + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Wk >35) 	 then askPriceUSD*100/(diff4Wk + 100)  
 ELSE 0
 END) as commonPtPrice,
 (@previousTradePair := CONCAT(exchangeName, tradePair)) as lastTradePair
@@ -479,7 +479,6 @@ ALTER TABLE CCIntTickerGSData ADD INDEX exchangePair (exchangeName, tradePair);
 
 select * from CCIntTickerGSData limit 12000;
 
-
 create table gsSpikeMetaData (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
@@ -544,7 +543,8 @@ create table gsSpikeMetaData2 (
     commonPtPrice FLOAT NULL,
     relStdDev1WkPreGS FLOAT NULL,
     relVariance1WkPreGS FLOAT NULL,
-    commonPtPreDiff FLOAT NULL
+    commonPtPreDiff FLOAT NULL,
+    minGSRelDiff FLOAT NULL
 );
 
 INSERT INTO gsSpikeMetaData2
@@ -555,7 +555,8 @@ t1.minGSTime, t1.maxGSTime, t1.minSpikeTime,
 t1.minGSPrice, t1.maxGSPrice, t1.netPercHike, t1.commonPtPrice,
 ROUND((STDDEV(t2.askPriceUSD)/AVG(t2.askPriceUSD)*100), 10) as relStdDev,
 ROUND((VARIANCE(t2.askPriceUSD)/POW(AVG(t2.askPriceUSD), 2)*100), 10) as relVariance, 
-ROUND((MAX(t2.askPriceUSD) - t1.commonPtPrice)/t1.commonPtPrice*100, 10) as commonPtPreDiff -- gs commonPtPreDiff should not be a very high positive number to ensure the commonPt of a GS is not a sharp dip
+ROUND((MAX(t2.askPriceUSD) - t1.commonPtPrice)/t1.commonPtPrice*100, 10) as commonPtPreDiff, -- gs commonPtPreDiff should not be a very high positive number to ensure the commonPt of a GS is not a sharp dip
+ROUND((MAX(t2.askPriceUSD) - t1.minGSPrice)/t1.minGSPrice*100, 10) as minGSRelDiff -- gs minGSRelDiff should be not be a very high positive number to ensure the minimum 35% pt of a GS is higher than all points in the month and not just a spike back up from a previous dip
 from gsSpikeMetaData as t1
 LEFT JOIN CCIntTickerGSData as t2 ON (t2.exchangeName = t1.exchangeName AND
 																	t2.tradePair = t1.tradePair AND
@@ -567,7 +568,6 @@ group by CONCAT(t1.exchangeName, t1.tradePair, t1.gsTracker)
 ;
 
 ALTER TABLE gsSpikeMetaData2 ADD INDEX exchangePair (exchangeName, tradePair);
-
 
 create table gsSpikeMetaData3 (
 	exchangeName VARCHAR(15) NULL,
@@ -588,7 +588,8 @@ create table gsSpikeMetaData3 (
     first48hmaxPercChange FLOAT NULL,
     relStdDev1WkPreGS FLOAT NULL,
     relVariance1WkPreGS FLOAT NULL,
-    commonPtPreDiff FLOAT NULL
+    commonPtPreDiff FLOAT NULL,
+    minGSRelDiff FLOAT NULL
 );
 
 INSERT INTO gsSpikeMetaData3
@@ -597,7 +598,7 @@ t1.postThresholdDuration, t1.totalDuration,
 t1.commonPtTime, t1.minGSTime, t1.maxGSTime, t1.minSpikeTime, 
 t1.minGSPrice, t1.maxGSPrice, t1.netPercHike, t1.commonPtPrice,
 max(t2.askPriceUSD) as maxFirst48hPrice, (max(t2.askPriceUSD)-t1.commonPtPrice)*100/t1.commonPtPrice as first48hmaxPercChange,
-t1.relStdDev1WkPreGS, t1.relVariance1WkPreGS, t1.commonPtPreDiff
+t1.relStdDev1WkPreGS, t1.relVariance1WkPreGS, t1.commonPtPreDiff, t1.minGSRelDiff
 from gsSpikeMetaData2 as t1
 LEFT JOIN CCIntTickerGSData as t2 ON (t2.exchangeName = t1.exchangeName AND
 																	t2.tradePair = t1.tradePair AND
@@ -609,6 +610,7 @@ group by CONCAT(t1.exchangeName, t1.tradePair, t1.gsTracker);
 
 ALTER TABLE gsSpikeMetaData3 ADD INDEX exchangePair (exchangeName, tradePair);
 
+select * from gsSpikeMetaData2 where  minGSPrice < 1000 order by minGSRelDiff desc;
 
 create table gsSpikeMetaData4 (
 	exchangeName VARCHAR(15) NULL,
@@ -630,6 +632,7 @@ create table gsSpikeMetaData4 (
     relStdDev1WkPreGS FLOAT NULL,
     relVariance1WkPreGS FLOAT NULL,
     commonPtPreDiff FLOAT NULL,
+    minGSRelDiff FLOAT NULL,
     maxPricePostGS FLOAT NULL,
     maxPricePostGSTime DATETIME NULL,
     minGSMaxBuy FLOAT NULL,
@@ -644,7 +647,7 @@ t7.postThresholdDuration, t7.totalDuration,
 t7.commonPtTime, t7.minGSTime, t7.maxGSTime, t7.minSpikeTime, 
 t7.minGSPrice, t7.maxGSPrice, t7.netPercHike, t7.commonPtPrice,
 t7.maxFirst48hPrice, t7.first48hmaxPercChange,
-t7.relStdDev1WkPreGS, t7.relVariance1WkPreGS, t7.commonPtPreDiff,
+t7.relStdDev1WkPreGS, t7.relVariance1WkPreGS, t7.commonPtPreDiff, t7.minGSRelDiff,
 t7.maxPricePostGS, t7.maxPricePostGSTime, 
 t7.minGSMaxBuy, t7.minGSMaxSell,
 t8.totalBuyAmount as maxGSMaxBuy, t8.totalSellAmount as maxGSMaxSell
@@ -655,7 +658,7 @@ t5.postThresholdDuration, t5.totalDuration,
 t5.commonPtTime, t5.minGSTime, t5.maxGSTime, t5.minSpikeTime, 
 t5.minGSPrice, t5.maxGSPrice, t5.netPercHike, t5.commonPtPrice,
 t5.maxFirst48hPrice, t5.first48hmaxPercChange,
-t5.relStdDev1WkPreGS, t5.relVariance1WkPreGS, t5.commonPtPreDiff,
+t5.relStdDev1WkPreGS, t5.relVariance1WkPreGS, t5.commonPtPreDiff, t5.minGSRelDiff,
 t5.minGSMaxBuy, t5.minGSMaxSell,
 t5.maxPricePostGS, t6.recordTime as maxPricePostGSTime from
 (
@@ -664,9 +667,8 @@ t3.postThresholdDuration, t3.totalDuration,
 t3.commonPtTime, t3.minGSTime, t3.maxGSTime, t3.minSpikeTime, 
 t3.minGSPrice, t3.maxGSPrice, t3.netPercHike, t3.commonPtPrice,
 t3.maxFirst48hPrice, t3.first48hmaxPercChange,
-t3.relStdDev1WkPreGS, t3.relVariance1WkPreGS, t3.commonPtPreDiff, 
+t3.relStdDev1WkPreGS, t3.relVariance1WkPreGS, t3.commonPtPreDiff, t3.minGSRelDiff,
 t3.minGSMaxBuy, t3.minGSMaxSell, max(t4.askPriceUSD) as maxPricePostGS
-
 from 
 (
 select t1.exchangeName, t1.tradePair, t1.gsTracker, t1.preThresholdDurOrGSMarker, 
@@ -674,7 +676,7 @@ t1.postThresholdDuration, t1.totalDuration,
 t1.commonPtTime, t1.minGSTime, t1.maxGSTime, t1.minSpikeTime, 
 t1.minGSPrice, t1.maxGSPrice, t1.netPercHike, t1.commonPtPrice,
 t1.maxFirst48hPrice, t1.first48hmaxPercChange,
-t1.relStdDev1WkPreGS, t1.relVariance1WkPreGS, t1.commonPtPreDiff, 
+t1.relStdDev1WkPreGS, t1.relVariance1WkPreGS, t1.commonPtPreDiff, t1.minGSRelDiff,
 max(t2.totalBuyAmount) as minGSMaxBuy, max(t2.totalSellAmount) as minGSMaxSell
 from gsSpikeMetaData3 as t1
 LEFT JOIN openOrders15MinAvg as t2 ON (t2.exchangeName = t1.exchangeName AND
@@ -733,6 +735,7 @@ create table gsSpikeMetaData5 (
     relStdDev1WkPreGS FLOAT NULL,
     relVariance1WkPreGS FLOAT NULL,
     commonPtPreDiff FLOAT NULL,
+    minGSRelDiff FLOAT NULL,
     maxPricePostGS FLOAT NULL,
     maxPricePostGSTime DATETIME NULL,
     minGSMaxBuy FLOAT NULL,
@@ -759,7 +762,7 @@ t7.postThresholdDuration, t7.totalDuration,
 t7.commonPtTime, t7.minGSTime, t7.maxGSTime, t7.minSpikeTime, 
 t7.minGSPrice, t7.maxGSPrice, t7.netPercHike, t7.commonPtPrice,
 t7.maxFirst48hPrice, t7.first48hmaxPercChange,
-t7.relStdDev1WkPreGS, t7.relVariance1WkPreGS, t7.commonPtPreDiff,
+t7.relStdDev1WkPreGS, t7.relVariance1WkPreGS, t7.commonPtPreDiff, t7.minGSRelDiff,
 t7.maxPricePostGS, t7.maxPricePostGSTime, 
 t7.minGSMaxBuy, t7.minGSMaxSell, t7.maxGSMaxBuy, t7.maxGSMaxSell
 from gsSpikeMetaData4 as t7;
@@ -788,6 +791,7 @@ create table gsSpikeMetaData6 (
     relStdDev1WkPreGS FLOAT NULL,
     relVariance1WkPreGS FLOAT NULL,
     commonPtPreDiff FLOAT NULL,
+	minGSRelDiff FLOAT NULL,
     maxPricePostGS FLOAT NULL,
     maxPricePostGSTime DATETIME NULL,
     minGSMaxBuy FLOAT NULL,
@@ -805,7 +809,7 @@ t7.postThresholdDuration, t7.totalDuration,
 t7.commonPtTime, t7.minGSTime, t7.maxGSTime, t7.minSpikeTime, 
 t7.minGSPrice, t7.maxGSPrice, t7.netPercHike, t7.commonPtPrice,
 t7.maxFirst48hPrice, t7.first48hmaxPercChange,
-t7.relStdDev1WkPreGS, t7.relVariance1WkPreGS, t7.commonPtPreDiff,
+t7.relStdDev1WkPreGS, t7.relVariance1WkPreGS, t7.commonPtPreDiff, t7.minGSRelDiff,
 t7.maxPricePostGS, t7.maxPricePostGSTime, 
 t7.minGSMaxBuy, t7.minGSMaxSell, t7.maxGSMaxBuy, t7.maxGSMaxSell,
 t1.volume_24h_usd, t1.market_cap_usd
@@ -840,6 +844,7 @@ create table gsSpikeMetaData7 (
     relStdDev1WkPreGS FLOAT NULL,
     relVariance1WkPreGS FLOAT NULL,
     commonPtPreDiff FLOAT NULL,
+    minGSRelDiff FLOAT NULL,
     maxPricePostGS FLOAT NULL,
     maxPricePostGSTime DATETIME NULL,
     minGSMaxBuy FLOAT NULL,
@@ -861,10 +866,91 @@ exchangeName, tradePair, symbol, gsTracker, preThresholdDurOrGSMarker,
 postThresholdDuration, totalDuration, commonPtTime, minGSTime, maxGSTime, 
 minSpikeTime, minGSPrice, maxGSPrice, netPercHike, commonPtPrice,
 maxFirst48hPrice, first48hmaxPercChange, relStdDev1WkPreGS, 
-relVariance1WkPreGS, commonPtPreDiff, maxPricePostGS, maxPricePostGSTime, 
+relVariance1WkPreGS, commonPtPreDiff, minGSRelDiff, maxPricePostGS, maxPricePostGSTime, 
 minGSMaxBuy, minGSMaxSell, maxGSMaxBuy, maxGSMaxSell, volume24hUSD, 
 marketCapUSD, minTime95Perc, maxTime95Perc, netDaysMoreThan95Perc, 
 netTimeWindowMoreThan95Perc, 
+(netDaysMoreThan95Perc*100/netTimeWindowMoreThan95Perc) as percNetDaysMoreThan95Perc
+from
+(
+select 
+t7.exchangeName, t7.tradePair, t7.symbol, t7.gsTracker, t7.preThresholdDurOrGSMarker, 
+t7.postThresholdDuration, t7.totalDuration, t7.commonPtTime, t7.minGSTime, t7.maxGSTime, 
+t7.minSpikeTime, t7.minGSPrice, t7.maxGSPrice, t7.netPercHike, t7.commonPtPrice,
+t7.maxFirst48hPrice, t7.first48hmaxPercChange, t7.relStdDev1WkPreGS, 
+t7.relVariance1WkPreGS, t7.commonPtPreDiff, t7.minGSRelDiff,
+t7.maxPricePostGS, t7.maxPricePostGSTime, 
+t7.minGSMaxBuy, t7.minGSMaxSell, t7.maxGSMaxBuy, t7.maxGSMaxSell, t7.volume24hUSD, 
+t7.marketCapUSD, min(t1.recordTime) as minTime95Perc, max(t1.recordTime) as maxTime95Perc, 
+((count(*) -1)*15)/(60*24) as netDaysMoreThan95Perc, 
+((UNIX_TIMESTAMP((max(t1.recordTime)))) - (UNIX_TIMESTAMP((min(t1.recordTime)))))/(3600*24) as netTimeWindowMoreThan95Perc
+
+from gsSpikeMetaData6 as t7
+LEFT JOIN CCIntTickerGSData as t1 ON (t1.exchangeName = t7.exchangeName AND
+																	t1.tradePair = t7.tradePair AND
+                                                                    t1.askPriceUSD >= (1.95*t7.commonPtPrice) AND
+                                                                    t1.recordTime <= t7.maxGSTime AND
+                                                                    t1.recordTime >= t7.minGSTime)
+group by t7.exchangeName, t7.tradePair, t7.gsTracker) t
+;
+ALTER TABLE gsSpikeMetaData7 ADD INDEX exchangePair (exchangeName, tradePair);
+
+
+--
+
+select * from gsSpikeMetaData7 as t1 
+-- select * from gsSpikeMetaData7 as t1 
+LEFT JOIN CCOpenOrdersGSData t2 ON (t2.exchangeName = t1.exchangeName AND
+																	t2.tradePair = t1.tradePair AND
+                                                                    t2.recordTime = t1.minGSTime)
+where t1.netPercHike >=100 and (t1.maxGSMaxBuy > 14 or  t1.minGSMaxBuy > 14) 
+and t1.symbol != 'BTC'  and t1.preThresholdDurOrGSMarker > 16  
+and t1.minGSRelDiff < -8
+-- and t1.commonPtPreDiff < 25
+-- and t1.minGSTime < t1.minSpikeTime
+order by  t1.minGSRelDiff ;
+																
+select * from gsSpikeMetaData7 as t1 
+-- select * from gsSpikeMetaData7 as t1 
+LEFT JOIN CCOpenOrdersGSData t2 ON (t2.exchangeName = t1.exchangeName AND
+																	t2.tradePair = t1.tradePair AND
+                                                                    t2.recordTime = t1.minGSTime)
+where t1.netPercHike <=35 and (t1.maxGSMaxBuy > 14 or  t1.minGSMaxBuy > 14) 
+and t1.symbol != 'BTC'  and t1.preThresholdDurOrGSMarker > 16  
+and t1.minGSRelDiff < -8
+-- and t1.minGSTime < t1.minSpikeTime
+-- and t1.commonPtPreDiff < 30
+and CONCAT(t1.exchangeName, t1.tradePair) not in 
+(select CONCAT(exchangeName, tradePair) from gsSpikeMetaData7 
+where netPercHike >=100 and (maxGSMaxBuy > 14 or  minGSMaxBuy > 14) 
+and symbol != 'BTC'  and preThresholdDurOrGSMarker > 16  
+and minGSRelDiff < -8
+-- and t1.commonPtPreDiff < 25
+-- and t1.minGSTime < t1.minSpikeTime
+order by  minGSRelDiff )
+order by t1.netPercHike ;
+
+select CONCAT(exchangeName, tradePair) from gsSpikeMetaData7 where netPercHike >=100 and (maxGSMaxBuy > 20 or  minGSMaxBuy > 20) and symbol != 'BTC'  and preThresholdDurOrGSMarker > 16  and minGSRelDiff < 0 order by commonPtPreDiff;
+
+select *, CONCAT(exchangeName, tradePair) from gsSpikeMetaData7 where netPercHike <=35 and (maxGSMaxBuy > 20 or  minGSMaxBuy > 20) and symbol != 'BTC'  and preThresholdDurOrGSMarker > 16  and minGSRelDiff < 0 order by commonPtPreDiff 
+and CONCAT(exchangeName, tradePair) not in 
+(select CONCAT(exchangeName, tradePair) from gsSpikeMetaData7 where netPercHike >=100 and (maxGSMaxBuy > 20 or  minGSMaxBuy > 20) and symbol != 'BTC'  and preThresholdDurOrGSMarker > 16  and minGSRelDiff < 0 order by commonPtPreDiff);
+
+
+
+--
+
+select 
+/*
+exchangeName, tradePair, symbol, gsTracker, preThresholdDurOrGSMarker, 
+postThresholdDuration, totalDuration, commonPtTime, minGSTime, maxGSTime, 
+minSpikeTime, minGSPrice, maxGSPrice, netPercHike, commonPtPrice,
+maxFirst48hPrice, first48hmaxPercChange, relStdDev1WkPreGS, 
+relVariance1WkPreGS, commonPtPreDiff, maxPricePostGS, maxPricePostGSTime, 
+minGSMaxBuy, minGSMaxSell, maxGSMaxBuy, maxGSMaxSell, volume24hUSD, 
+marketCapUSD, 
+*/
+*, 
 (netDaysMoreThan95Perc*100/netTimeWindowMoreThan95Perc) as percNetDaysMoreThan95Perc
 from
 (
@@ -882,24 +968,111 @@ t7.marketCapUSD, min(t1.recordTime) as minTime95Perc, max(t1.recordTime) as maxT
 from gsSpikeMetaData6 as t7
 LEFT JOIN CCIntTickerGSData as t1 ON (t1.exchangeName = t7.exchangeName AND
 																	t1.tradePair = t7.tradePair AND
-                                                                    t1.askPriceUSD >= (1.95*t7.commonPtPrice) AND
+                                                                    t1.askPriceUSD >= (1.31*t7.commonPtPrice) AND
                                                                     t1.recordTime <= t7.maxGSTime AND
                                                                     t1.recordTime >= t7.minGSTime)
 group by t7.exchangeName, t7.tradePair, t7.gsTracker) t
+where netPercHike <=35 and (maxGSMaxBuy > 20 or  minGSMaxBuy > 20) and symbol != 'BTC'  
+and preThresholdDurOrGSMarker > 16
+and commonPtPreDiff <55 
+and minTime95Perc IS NOT NULL and CONCAT(exchangeName, tradePair) NOT IN 
+(select CONCAT(exchangeName, tradePair) from gsSpikeMetaData7 where netPercHike >=100 and (maxGSMaxBuy > 20 or  minGSMaxBuy > 20) and symbol != 'BTC'  and preThresholdDurOrGSMarker > 16  and commonPtPreDiff <55 order by commonPtPreDiff )
+order by commonPtPreDiff 
 ;
+
+select t1.symbol, CONCAT(t1.exchangeName, t1.tradePair), t2.diffCommonPt from gsSpikeMetaDataDel as t1 
+LEFT JOIN CCOpenOrdersGSData as t2 ON (t2.exchangeName = t1.exchangeName AND
+																	t2.tradePair = t1.tradePair AND
+                                                                    t2.recordTime = t1.minGSTime)
+                                                                    
+where t1.netPercHike <=35 and (t1.maxGSMaxBuy > 20 or  t1.minGSMaxBuy > 20) and t1.symbol != 'BTC'  
+and t1.preThresholdDurOrGSMarker > 16
+and t1.commonPtPreDiff <55 
+and t1.minTime31Perc IS NOT NULL and CONCAT(t1.exchangeName, t1.tradePair) NOT IN 
+(select CONCAT(exchangeName, tradePair) from gsSpikeMetaDataDel where 
+netPercHike >=100 and (maxGSMaxBuy > 20 or  minGSMaxBuy > 20) and symbol != 'BTC'  
+and preThresholdDurOrGSMarker > 16  and commonPtPreDiff <55 order by commonPtPreDiff )
+order by commonPtPreDiff 
+ ;
+
+select *, CONCAT(exchangeName, tradePair) from gsSpikeMetaData7 where netPercHike >=100 and (maxGSMaxBuy > 20 or  minGSMaxBuy > 20) and symbol != 'BTC'  and preThresholdDurOrGSMarker > 16  and minGSRelDiff < 0 order by commonPtPreDiff ;
+
+select *, CONCAT(exchangeName, tradePair) from gsSpikeMetaData7 where netPercHike <=35 and (maxGSMaxBuy > 20 or  minGSMaxBuy > 20) and symbol != 'BTC'  and preThresholdDurOrGSMarker > 16  and minGSRelDiff < 0 order by commonPtPreDiff 
+and CONCAT(exchangeName, tradePair) not in 
+(select CONCAT(exchangeName, tradePair) from gsSpikeMetaData7 where netPercHike >=100 and (maxGSMaxBuy > 20 or  minGSMaxBuy > 20) and symbol != 'BTC'  and preThresholdDurOrGSMarker > 16  and minGSRelDiff < 0 order by commonPtPreDiff);
+
+
+select DISTINCT(CONCAT(exchangeName, tradePair)) from
+(
+select t1.exchangeName, t1.tradePair, t2.diffCommonPt, t1.gsTracker from
+gsSpikeMetaData7 as t1
+LEFT JOIN CCOpenOrdersGSData t2 ON (t2.exchangeName = t1.exchangeName AND
+																	t2.tradePair = t1.tradePair AND
+                                                                    t2.recordTime = t1.minGSTime)
+where t1.netPercHike < 35 
+ and t1.gsTracker =1
+
+) t
+where CONCAT(exchangeName, tradePair)  NOT IN 
+(select DISTINCT(CONCAT(exchangeName, tradePair)) from
+(
+select t1.exchangeName, t1.tradePair, t2.diffCommonPt, t1.gsTracker from
+gsSpikeMetaData7 as t1
+LEFT JOIN CCOpenOrdersGSData t2 ON (t2.exchangeName = t1.exchangeName AND
+																	t2.tradePair = t1.tradePair AND
+                                                                    t2.recordTime = t1.minGSTime)
+where t1.netPercHike > 35 
+and t1.gsTracker =1
+
+) t2);
 
 
 ALTER TABLE gsSpikeMetaData7 ADD INDEX exchangePair (exchangeName, tradePair);
 
 use pocu4;
 
-select *, CONCAT(exchangeName, tradePair)  from gsSpikeMetaData7 where netPercHike <=30 and (maxGSMaxBuy > 20 or  minGSMaxBuy > 20) and minGSPrice < 1000 and preThresholdDurOrGSMarker >=16;
-   
-   and commonPtPreDiff < 50 and preThresholdDurOrGSMarker >=16;
+select *, CONCAT(t1.exchangeName, t1.tradePair)  from gsSpikeMetaData7 as t1 
+LEFT JOIN CCOpenOrdersGSData t2 ON (t2.exchangeName = t1.exchangeName AND
+																	t2.tradePair = t1.tradePair AND
+                                                                    t2.recordTime = t1.minGSTime)
+where t1.netPercHike <=35 
+and (t1.maxGSMaxBuy > 20 or  t1.minGSMaxBuy > 20) 
+and t1.preThresholdDurOrGSMarker >=16 
+and t1.commonPtPreDiff < 35
+-- and t2.diffCommonPt > 35
+and t1.gsTracker = 1
+and CONCAT(t1.exchangeName, t1.tradePair) NOT IN
+(select CONCAT(t1.exchangeName, t1.tradePair)  from gsSpikeMetaData7 as t1 
+LEFT JOIN CCOpenOrdersGSData t2 ON (t2.exchangeName = t1.exchangeName AND
+																	t2.tradePair = t1.tradePair AND
+                                                                    t2.recordTime = t1.minGSTime)
+where t1.netPercHike >=35 
+and (t1.maxGSMaxBuy > 20 or  t1.minGSMaxBuy > 20) 
+and t1.preThresholdDurOrGSMarker >=16 
+and t1.commonPtPreDiff < 35
+-- and t2.diffCommonPt > 35
+and t1.gsTracker = 1);
 
-select *, CONCAT(exchangeName, tradePair) from gsSpikeMetaData7 where netPercHike >=100 and (maxGSMaxBuy > 20 or  minGSMaxBuy > 20) and minGSPrice < 1000 and preThresholdDurOrGSMarker >=16;
 
-  and commonPtPreDiff < 50 and preThresholdDurOrGSMarker >=16; 
+select CONCAT(t1.exchangeName, t1.tradePair)  from gsSpikeMetaData7 as t1 
+LEFT JOIN CCOpenOrdersGSData t2 ON (t2.exchangeName = t1.exchangeName AND
+																	t2.tradePair = t1.tradePair AND
+                                                                    t2.recordTime = t1.minGSTime)
+where t1.netPercHike >=35 
+and (t1.maxGSMaxBuy > 20 or  t1.minGSMaxBuy > 20) 
+and t1.preThresholdDurOrGSMarker >=16 
+and t1.commonPtPreDiff < 35
+-- and t2.diffCommonPt > 35
+and t1.gsTracker = 1;
+
+
+
+
+select *, CONCAT(exchangeName, tradePair) from gsSpikeMetaData7 where netPercHike >=100 and (maxGSMaxBuy > 20 or  minGSMaxBuy > 20) and symbol != 'BTC'  and preThresholdDurOrGSMarker > 8 and first48hmaxPercChange > 35 order by commonPtPreDiff ;
+
+select *, CONCAT(exchangeName, tradePair) from gsSpikeMetaData7 where netPercHike <=35 and (maxGSMaxBuy > 20 or  minGSMaxBuy > 20) and symbol != 'BTC'  and preThresholdDurOrGSMarker > 8  and first48hmaxPercChange > 30 order by commonPtPreDiff ;
+
+--  and commonPtPreDiff < 50 and preThresholdDurOrGSMarker >=16; 
 
 select DISTINCT (CONCAT(exchangeName, tradePair)) from gsSpikeMetaData7 where  (maxGSMaxBuy > 20 or  minGSMaxBuy > 20) ;
 
@@ -922,14 +1095,14 @@ commonPtTime > '2017-10-07 23:59:59' and
  -- maxGSPrice > minGSPrice
  -- increase threshold from 30 to higher
  -- ensure u wait weeks after a big spike
- netPercHike <= 30
+ netPercHike <= 35
   -- and preThresholdDurOrGSMarker >= 16
   -- and exchangeName NOT IN ('yoBit', 'novaexchange', 'livecoin')
   and  commonPtPreDiff < 19
   --  and volume24hUSD > 10000 
   and marketCapUSD > 1000000
  and CONCAT(exchangeName, tradePair) NOT IN 
- (select CONCAT(exchangeName, tradePair) from gsSpikeMetaData6 where netPercHike > 30)
+ (select CONCAT(exchangeName, tradePair) from gsSpikeMetaData6 where netPercHike > 35)
  order by netPercHike desc;
   
 select DISTINCT (CONCAT(exchangeName, tradePair)) from gsSpikeMetaData6
@@ -941,14 +1114,14 @@ commonPtTime > '2017-10-07 23:59:59' and
  -- maxGSPrice > minGSPrice
  -- increase threshold from 30 to higher
  -- ensure u wait weeks after a big spike
- netPercHike <= 30
+ netPercHike <= 35
   -- and preThresholdDurOrGSMarker >= 16
   -- and exchangeName NOT IN ('yoBit', 'novaexchange', 'livecoin')
   and  commonPtPreDiff < 19
   --  and volume24hUSD > 10000 
   and marketCapUSD > 1000000
  and CONCAT(exchangeName, tradePair) NOT IN 
- (select CONCAT(exchangeName, tradePair) from gsSpikeMetaData6 where netPercHike >= 30)
+ (select CONCAT(exchangeName, tradePair) from gsSpikeMetaData6 where netPercHike >= 35)
  order by netPercHike desc;
   
 
@@ -974,15 +1147,15 @@ select CONCAT(exchangeName, tradePair, gsTracker) from gsSpikeMetaData7 where ne
 
 
 
-select DISTINCT (CONCAT(exchangeName, tradePair)) from gsSpikeMetaData6 where netPercHike >= 30 and volume24hUSD > 10000 and  commonPtPreDiff < 19 and relStdDev1WkPreGS < 11;
+select DISTINCT (CONCAT(exchangeName, tradePair)) from gsSpikeMetaData6 where netPercHike >= 35 and volume24hUSD > 10000 and  commonPtPreDiff < 19 and relStdDev1WkPreGS < 11;
 
-select DISTINCT (CONCAT(exchangeName, tradePair)) from gsSpikeMetaData6 where netPercHike >= 30 and volume24hUSD > 10000 and  commonPtPreDiff < 19 and relStdDev1WkPreGS < 9 and netPercHike >= first48hmaxPercChange;
+select DISTINCT (CONCAT(exchangeName, tradePair)) from gsSpikeMetaData6 where netPercHike >= 35 and volume24hUSD > 10000 and  commonPtPreDiff < 19 and relStdDev1WkPreGS < 9 and netPercHike >= first48hmaxPercChange;
  
 select DISTINCT (CONCAT(exchangeName, tradePair)) from gsSpikeMetaData3 where netPercHike >= 50 and commonPtPreDiff < 19 and preThresholdDurOrGSMarker >= 16 and exchangeName NOT IN ('yoBit', 'novaexchange', 'livecoin')  order by netPercHike desc ;
  
 select * from gsSpikeMetaData2 where totalDuration >= 100 and commonPtPreDiff < 20 order by netPercHike desc;
 
-select DISTINCT (CONCAT(exchangeName, tradePair)) from gsSpikeMetaData6 where netPercHike >= 30 and maxGSTime < '2017-10-05 23:59:59' and minGSTime != maxGSTime and relStdDev1WkPreGS < 15 and preThresholdDurOrGSMarker >= 8 ;
+select DISTINCT (CONCAT(exchangeName, tradePair)) from gsSpikeMetaData6 where netPercHike >= 35 and maxGSTime < '2017-10-05 23:59:59' and minGSTime != maxGSTime and relStdDev1WkPreGS < 15 and preThresholdDurOrGSMarker >= 8 ;
 
 
 select count(*) from gsSpikeMetaData2 where commonPtPreDiff < 20;
@@ -991,4 +1164,4 @@ NOT IN (select DISTINCT (CONCAT(exchangeName, tradePair)) from gsSpikeMetaData2 
 order by netPercHike desc;
 
 
-select * from gsSpikeMetaData6 where netPercHike >= 30 and maxGSTime < '2017-11-06 17:15:00';
+select * from gsSpikeMetaData6 where netPercHike >= 35 and maxGSTime < '2017-11-06 17:15:00';

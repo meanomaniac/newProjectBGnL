@@ -27,6 +27,26 @@ select count(*) from CCIntTicker;
 
 SELECT * FROM CCIntTicker where tradePair = 'BTC-MONA';
 
+CREATE TABLE CCIntOpenOrders (
+	exchangeName VARCHAR(15) NULL,
+	tradePair VARCHAR(20) NULL,
+	totalBuyAmount FLOAT NULL,
+	totalSellAmount FLOAT NULL,
+	recordTime DATETIME NULL
+);
+
+INSERT INTO CCIntOpenOrders
+SELECT exchangeName, tradePair, totalBuyAmount, totalSellAmount, recordTime 
+from openOrders15MinAvg where CONCAT(exchangeName, tradePair) IN 
+-- the following gives all the unique tradePair combos that have a max value more than twice of the min and that the max has occured after the min
+(SELECT CONCAT(exchangeName, tradePair) AS exchTP
+from mthDiffMinMaxWithTradingInfo 
+where timeOfMax > timeOfMin AND (maxPriceUSD-minPriceUSD)/minPriceUSD > 1
+AND exchangeName != 'coinMarketCap' AND exchangeName != 'coinExchange' );
+
+ALTER TABLE CCIntOpenOrders ADD INDEX exchangePair2 (exchangeName, tradePair, recordTime);
+-- ALTER TABLE CCIntOpenOrders ADD INDEX exchangePair (exchangeName, tradePair);
+
 -- del
 -- 20 mins
 

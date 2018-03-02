@@ -1,91 +1,58 @@
-CREATE TABLE CCOpenOrdersWSpikeInfo (
-	exchangeName VARCHAR(15) NULL,
-	tradePair VARCHAR(20) NULL,
-	askPriceUSD FLOAT NULL,
-	askPriceBTC FLOAT NULL,
-	recordTime DATETIME NULL,
-    spikeStarts TINYINT(1) DEFAULT 0
-);
-
-INSERT INTO CCOpenOrdersWSpikeInfo
-select exchangeName, tradePair, askPriceUSD, askPriceBTC, recordTime, 
-(case CONCAT(exchangeName, tradePair, recordTime) IN (select spikeBaseString from spikeStringTable)
-WHEN true then 1
-WHEN false then 0 END) as spikeStarts
-from CCOpenOrders ;
-
-ALTER TABLE CCOpenOrdersWSpikeInfo ADD INDEX exchangePair (exchangeName, tradePair);
-
-select * from CCOpenOrdersWSpikeInfo where spikeStarts = 1;
-
+use pocu4;
 
 CREATE TABLE CCOpenOrdersWPriceDiff (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
-	askPriceUSD FLOAT NULL,
-	askPriceBTC FLOAT NULL,
+	totalBuyAmount FLOAT NULL,
+	totalSellAmount FLOAT NULL,
 	recordTime DATETIME NULL,
-    spikeStarts TINYINT(1) DEFAULT 0,
     diff2Hr FLOAT NULL
-    /* ,
-    diff4Hr FLOAT NULL,
-    diff8Hr FLOAT NULL,
-    diff16Hr FLOAT NULL,
-    diff1Day FLOAT NULL,
-    diff2Day FLOAT NULL,
-    diff4Day FLOAT NULL,
-    diff1Wk FLOAT NULL,
-    diff2Wk FLOAT NULL,
-    diff4Wk FLOAT NULL
-    */
 );
 
 INSERT INTO CCOpenOrdersWPriceDiff
 select 
-temp1.exchangeName, temp1.tradePair, temp1.askPriceUSD, temp1.askPriceBTC, 
-temp1.recordTime, temp1.spikeStarts, (temp1.askPriceUSD - temp2.askPriceUSD)*100/temp2.askPriceUSD as diff2Hr
-from CCOpenOrdersWSpikeInfo temp1
-LEFT JOIN CCOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
+temp1.exchangeName, temp1.tradePair, temp1.totalBuyAmount, temp1.totalSellAmount, 
+temp1.recordTime, (temp1.totalBuyAmount - temp2.totalBuyAmount)*100/temp2.totalBuyAmount as diff2Hr
+from CCIntOpenOrders temp1
+LEFT JOIN CCIntOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
 														temp2.tradePair = temp1.tradePair AND
 														FROM_UNIXTIME((UNIX_TIMESTAMP(temp2.recordTime)) +7200) = temp1.recordTime);
 
-ALTER TABLE CCOpenOrdersWPriceDiff ADD INDEX exchangePair (exchangeName, tradePair);
-
+ALTER TABLE CCOpenOrdersWPriceDiff ADD INDEX exchangePair2 (exchangeName, tradePair, recordTime);
 select * from CCOpenOrdersWPriceDiff limit 10000;
-
 
 CREATE TABLE CCOpenOrdersWPriceDiff2 (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
-	askPriceUSD FLOAT NULL,
-	askPriceBTC FLOAT NULL,
+	totalBuyAmount FLOAT NULL,
+	totalSellAmount FLOAT NULL,
 	recordTime DATETIME NULL,
-    spikeStarts TINYINT(1) DEFAULT 0,
     diff2Hr FLOAT NULL,
     diff4Hr FLOAT NULL
 );
 
 INSERT INTO CCOpenOrdersWPriceDiff2
 select 
-temp1.exchangeName, temp1.tradePair, temp1.askPriceUSD, temp1.askPriceBTC, 
-temp1.recordTime, temp1.spikeStarts, temp1.diff2Hr,
-(temp1.askPriceUSD - temp2.askPriceUSD)*100/temp2.askPriceUSD as diff4Hr
+temp1.exchangeName, temp1.tradePair, temp1.totalBuyAmount, temp1.totalSellAmount, 
+temp1.recordTime, temp1.diff2Hr,
+(temp1.totalBuyAmount - temp2.totalBuyAmount)*100/temp2.totalBuyAmount as diff4Hr
 from CCOpenOrdersWPriceDiff temp1
-LEFT JOIN CCOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
+LEFT JOIN CCIntOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
 														temp2.tradePair = temp1.tradePair AND
 														FROM_UNIXTIME((UNIX_TIMESTAMP(temp2.recordTime)) +14400) = temp1.recordTime);
 
-ALTER TABLE CCOpenOrdersWPriceDiff2 ADD INDEX exchangePair (exchangeName, tradePair);
 
-select * from CCOpenOrdersWPriceDiff2 limit 3000;
+ALTER TABLE CCIntOpenOrders ADD INDEX exchangePair2 (exchangeName, tradePair, recordTime);
+
+select count(*) from CCOpenOrdersWPriceDiff2;
 
 CREATE TABLE CCOpenOrdersWPriceDiff3 (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
-	askPriceUSD FLOAT NULL,
-	askPriceBTC FLOAT NULL,
+	totalBuyAmount FLOAT NULL,
+	totalSellAmount FLOAT NULL,
 	recordTime DATETIME NULL,
-    spikeStarts TINYINT(1) DEFAULT 0,
+    
     diff2Hr FLOAT NULL,
     diff4Hr FLOAT NULL,
     diff8Hr FLOAT NULL
@@ -93,25 +60,25 @@ CREATE TABLE CCOpenOrdersWPriceDiff3 (
 
 INSERT INTO CCOpenOrdersWPriceDiff3
 select 
-temp1.exchangeName, temp1.tradePair, temp1.askPriceUSD, temp1.askPriceBTC, 
-temp1.recordTime, temp1.spikeStarts, temp1.diff2Hr, temp1.diff4Hr,
-(temp1.askPriceUSD - temp2.askPriceUSD)*100/temp2.askPriceUSD as diff8Hr
+temp1.exchangeName, temp1.tradePair, temp1.totalBuyAmount, temp1.totalSellAmount, 
+temp1.recordTime, temp1.diff2Hr, temp1.diff4Hr,
+(temp1.totalBuyAmount - temp2.totalBuyAmount)*100/temp2.totalBuyAmount as diff8Hr
 from CCOpenOrdersWPriceDiff2 temp1
-LEFT JOIN CCOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
+LEFT JOIN CCIntOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
 														temp2.tradePair = temp1.tradePair AND
 														FROM_UNIXTIME((UNIX_TIMESTAMP(temp2.recordTime)) +28800) = temp1.recordTime);
 
-ALTER TABLE CCOpenOrdersWPriceDiff3 ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE CCOpenOrdersWPriceDiff3 ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
 
 select * from CCOpenOrdersWPriceDiff3 limit 6000;
 
 CREATE TABLE CCOpenOrdersWPriceDiff4 (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
-	askPriceUSD FLOAT NULL,
-	askPriceBTC FLOAT NULL,
+	totalBuyAmount FLOAT NULL,
+	totalSellAmount FLOAT NULL,
 	recordTime DATETIME NULL,
-    spikeStarts TINYINT(1) DEFAULT 0,
+    
     diff2Hr FLOAT NULL,
     diff4Hr FLOAT NULL,
     diff8Hr FLOAT NULL,
@@ -120,25 +87,25 @@ CREATE TABLE CCOpenOrdersWPriceDiff4 (
 
 INSERT INTO CCOpenOrdersWPriceDiff4
 select 
-temp1.exchangeName, temp1.tradePair, temp1.askPriceUSD, temp1.askPriceBTC, 
-temp1.recordTime, temp1.spikeStarts, temp1.diff2Hr, temp1.diff4Hr, temp1.diff8Hr,
-(temp1.askPriceUSD - temp2.askPriceUSD)*100/temp2.askPriceUSD as diff16Hr
+temp1.exchangeName, temp1.tradePair, temp1.totalBuyAmount, temp1.totalSellAmount, 
+temp1.recordTime, temp1.diff2Hr, temp1.diff4Hr, temp1.diff8Hr,
+(temp1.totalBuyAmount - temp2.totalBuyAmount)*100/temp2.totalBuyAmount as diff16Hr
 from CCOpenOrdersWPriceDiff3 temp1
-LEFT JOIN CCOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
+LEFT JOIN CCIntOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
 														temp2.tradePair = temp1.tradePair AND
 														FROM_UNIXTIME((UNIX_TIMESTAMP(temp2.recordTime)) +57600) = temp1.recordTime);
 
-ALTER TABLE CCOpenOrdersWPriceDiff4 ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE CCOpenOrdersWPriceDiff4 ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
+ALTER TABLE CCOpenOrdersWPriceDiff4 ADD INDEX exchangePair2 (exchangeName, tradePair);
 
 select * from CCOpenOrdersWPriceDiff4 limit 12000;
 
 CREATE TABLE CCOpenOrdersWPriceDiff5 (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
-	askPriceUSD FLOAT NULL,
-	askPriceBTC FLOAT NULL,
+	totalBuyAmount FLOAT NULL,
+	totalSellAmount FLOAT NULL,
 	recordTime DATETIME NULL,
-    spikeStarts TINYINT(1) DEFAULT 0,
     diff2Hr FLOAT NULL,
     diff4Hr FLOAT NULL,
     diff8Hr FLOAT NULL,
@@ -148,26 +115,25 @@ CREATE TABLE CCOpenOrdersWPriceDiff5 (
 
 INSERT INTO CCOpenOrdersWPriceDiff5
 select 
-temp1.exchangeName, temp1.tradePair, temp1.askPriceUSD, temp1.askPriceBTC, 
-temp1.recordTime, temp1.spikeStarts, temp1.diff2Hr, temp1.diff4Hr, temp1.diff8Hr,
-temp1.diff16Hr,
-(temp1.askPriceUSD - temp2.askPriceUSD)*100/temp2.askPriceUSD as diff1Day
+temp1.exchangeName, temp1.tradePair, temp1.totalBuyAmount, temp1.totalSellAmount, 
+temp1.recordTime, temp1.diff2Hr, temp1.diff4Hr, temp1.diff8Hr, temp1.diff16Hr,
+(temp1.totalBuyAmount - temp2.totalBuyAmount)*100/temp2.totalBuyAmount as diff1Day
 from CCOpenOrdersWPriceDiff4 temp1
-LEFT JOIN CCOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
+LEFT JOIN CCIntOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
 														temp2.tradePair = temp1.tradePair AND
 														FROM_UNIXTIME((UNIX_TIMESTAMP(temp2.recordTime)) +86400) = temp1.recordTime);
 
-ALTER TABLE CCOpenOrdersWPriceDiff5 ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE CCOpenOrdersWPriceDiff5 ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
 
 select * from CCOpenOrdersWPriceDiff5 limit 12000;
 
 CREATE TABLE CCOpenOrdersWPriceDiff6 (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
-	askPriceUSD FLOAT NULL,
-	askPriceBTC FLOAT NULL,
+	totalBuyAmount FLOAT NULL,
+	totalSellAmount FLOAT NULL,
 	recordTime DATETIME NULL,
-    spikeStarts TINYINT(1) DEFAULT 0,
+    
     diff2Hr FLOAT NULL,
     diff4Hr FLOAT NULL,
     diff8Hr FLOAT NULL,
@@ -178,26 +144,26 @@ CREATE TABLE CCOpenOrdersWPriceDiff6 (
 
 INSERT INTO CCOpenOrdersWPriceDiff6
 select 
-temp1.exchangeName, temp1.tradePair, temp1.askPriceUSD, temp1.askPriceBTC, 
-temp1.recordTime, temp1.spikeStarts, temp1.diff2Hr, temp1.diff4Hr, temp1.diff8Hr,
+temp1.exchangeName, temp1.tradePair, temp1.totalBuyAmount, temp1.totalSellAmount, 
+temp1.recordTime, temp1.diff2Hr, temp1.diff4Hr, temp1.diff8Hr,
 temp1.diff16Hr, temp1.diff1Day,
-(temp1.askPriceUSD - temp2.askPriceUSD)*100/temp2.askPriceUSD as diff2Day
+(temp1.totalBuyAmount - temp2.totalBuyAmount)*100/temp2.totalBuyAmount as diff2Day
 from CCOpenOrdersWPriceDiff5 temp1
-LEFT JOIN CCOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
+LEFT JOIN CCIntOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
 														temp2.tradePair = temp1.tradePair AND
 														FROM_UNIXTIME((UNIX_TIMESTAMP(temp2.recordTime)) +172800) = temp1.recordTime);
 
-ALTER TABLE CCOpenOrdersWPriceDiff6 ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE CCOpenOrdersWPriceDiff6 ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
 
 select * from CCOpenOrdersWPriceDiff6 limit 12000;
 
 CREATE TABLE CCOpenOrdersWPriceDiff7 (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
-	askPriceUSD FLOAT NULL,
-	askPriceBTC FLOAT NULL,
+	totalBuyAmount FLOAT NULL,
+	totalSellAmount FLOAT NULL,
 	recordTime DATETIME NULL,
-    spikeStarts TINYINT(1) DEFAULT 0,
+    
     diff2Hr FLOAT NULL,
     diff4Hr FLOAT NULL,
     diff8Hr FLOAT NULL,
@@ -209,26 +175,26 @@ CREATE TABLE CCOpenOrdersWPriceDiff7 (
 
 INSERT INTO CCOpenOrdersWPriceDiff7
 select 
-temp1.exchangeName, temp1.tradePair, temp1.askPriceUSD, temp1.askPriceBTC, 
-temp1.recordTime, temp1.spikeStarts, temp1.diff2Hr, temp1.diff4Hr, temp1.diff8Hr,
+temp1.exchangeName, temp1.tradePair, temp1.totalBuyAmount, temp1.totalSellAmount, 
+temp1.recordTime, temp1.diff2Hr, temp1.diff4Hr, temp1.diff8Hr,
 temp1.diff16Hr, temp1.diff1Day, temp1.diff2Day,
-(temp1.askPriceUSD - temp2.askPriceUSD)*100/temp2.askPriceUSD as diff4Day
+(temp1.totalBuyAmount - temp2.totalBuyAmount)*100/temp2.totalBuyAmount as diff4Day
 from CCOpenOrdersWPriceDiff6 temp1
-LEFT JOIN CCOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
+LEFT JOIN CCIntOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
 														temp2.tradePair = temp1.tradePair AND
 														FROM_UNIXTIME((UNIX_TIMESTAMP(temp2.recordTime)) +345600) = temp1.recordTime);
 
-ALTER TABLE CCOpenOrdersWPriceDiff7 ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE CCOpenOrdersWPriceDiff7 ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
 
 select * from CCOpenOrdersWPriceDiff7 limit 12000;
 
 CREATE TABLE CCOpenOrdersWPriceDiff8 (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
-	askPriceUSD FLOAT NULL,
-	askPriceBTC FLOAT NULL,
+	totalBuyAmount FLOAT NULL,
+	totalSellAmount FLOAT NULL,
 	recordTime DATETIME NULL,
-    spikeStarts TINYINT(1) DEFAULT 0,
+    
     diff2Hr FLOAT NULL,
     diff4Hr FLOAT NULL,
     diff8Hr FLOAT NULL,
@@ -241,26 +207,26 @@ CREATE TABLE CCOpenOrdersWPriceDiff8 (
 
 INSERT INTO CCOpenOrdersWPriceDiff8
 select 
-temp1.exchangeName, temp1.tradePair, temp1.askPriceUSD, temp1.askPriceBTC, 
-temp1.recordTime, temp1.spikeStarts, temp1.diff2Hr, temp1.diff4Hr, temp1.diff8Hr,
+temp1.exchangeName, temp1.tradePair, temp1.totalBuyAmount, temp1.totalSellAmount, 
+temp1.recordTime, temp1.diff2Hr, temp1.diff4Hr, temp1.diff8Hr,
 temp1.diff16Hr, temp1.diff1Day, temp1.diff2Day, temp1.diff4Day,
-(temp1.askPriceUSD - temp2.askPriceUSD)*100/temp2.askPriceUSD as diff1Wk
+(temp1.totalBuyAmount - temp2.totalBuyAmount)*100/temp2.totalBuyAmount as diff1Wk
 from CCOpenOrdersWPriceDiff7 temp1
-LEFT JOIN CCOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
+LEFT JOIN CCIntOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
 														temp2.tradePair = temp1.tradePair AND
 														FROM_UNIXTIME((UNIX_TIMESTAMP(temp2.recordTime)) +604800) = temp1.recordTime);
 
-ALTER TABLE CCOpenOrdersWPriceDiff8 ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE CCOpenOrdersWPriceDiff8 ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
 
 select * from CCOpenOrdersWPriceDiff8 limit 12000;
 
 CREATE TABLE CCOpenOrdersWPriceDiff9 (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
-	askPriceUSD FLOAT NULL,
-	askPriceBTC FLOAT NULL,
+	totalBuyAmount FLOAT NULL,
+	totalSellAmount FLOAT NULL,
 	recordTime DATETIME NULL,
-    spikeStarts TINYINT(1) DEFAULT 0,
+    
     diff2Hr FLOAT NULL,
     diff4Hr FLOAT NULL,
     diff8Hr FLOAT NULL,
@@ -274,26 +240,26 @@ CREATE TABLE CCOpenOrdersWPriceDiff9 (
 
 INSERT INTO CCOpenOrdersWPriceDiff9
 select 
-temp1.exchangeName, temp1.tradePair, temp1.askPriceUSD, temp1.askPriceBTC, 
-temp1.recordTime, temp1.spikeStarts, temp1.diff2Hr, temp1.diff4Hr, temp1.diff8Hr,
+temp1.exchangeName, temp1.tradePair, temp1.totalBuyAmount, temp1.totalSellAmount, 
+temp1.recordTime, temp1.diff2Hr, temp1.diff4Hr, temp1.diff8Hr,
 temp1.diff16Hr, temp1.diff1Day, temp1.diff2Day, temp1.diff4Day, temp1.diff1Wk,
-(temp1.askPriceUSD - temp2.askPriceUSD)*100/temp2.askPriceUSD as diff2Wk
+(temp1.totalBuyAmount - temp2.totalBuyAmount)*100/temp2.totalBuyAmount as diff2Wk
 from CCOpenOrdersWPriceDiff8 temp1
-LEFT JOIN CCOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
+LEFT JOIN CCIntOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
 														temp2.tradePair = temp1.tradePair AND
 														FROM_UNIXTIME((UNIX_TIMESTAMP(temp2.recordTime)) +1209600) = temp1.recordTime);
 
-ALTER TABLE CCOpenOrdersWPriceDiff9 ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE CCOpenOrdersWPriceDiff9 ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
 
 select * from CCOpenOrdersWPriceDiff9 limit 12000;
 
 CREATE TABLE CCOpenOrdersWPriceDiff10 (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
-	askPriceUSD FLOAT NULL,
-	askPriceBTC FLOAT NULL,
+	totalBuyAmount FLOAT NULL,
+	totalSellAmount FLOAT NULL,
 	recordTime DATETIME NULL,
-    spikeStarts TINYINT(1) DEFAULT 0,
+    
     diff2Hr FLOAT NULL,
     diff4Hr FLOAT NULL,
     diff8Hr FLOAT NULL,
@@ -308,16 +274,16 @@ CREATE TABLE CCOpenOrdersWPriceDiff10 (
 
 INSERT INTO CCOpenOrdersWPriceDiff10
 select 
-temp1.exchangeName, temp1.tradePair, temp1.askPriceUSD, temp1.askPriceBTC, 
-temp1.recordTime, temp1.spikeStarts, temp1.diff2Hr, temp1.diff4Hr, temp1.diff8Hr,
+temp1.exchangeName, temp1.tradePair, temp1.totalBuyAmount, temp1.totalSellAmount, 
+temp1.recordTime, temp1.diff2Hr, temp1.diff4Hr, temp1.diff8Hr,
 temp1.diff16Hr, temp1.diff1Day, temp1.diff2Day, temp1.diff4Day, temp1.diff1Wk, temp1.diff2Wk,
-(temp1.askPriceUSD - temp2.askPriceUSD)*100/temp2.askPriceUSD as diff4Wk
+(temp1.totalBuyAmount - temp2.totalBuyAmount)*100/temp2.totalBuyAmount as diff4Wk
 from CCOpenOrdersWPriceDiff9 temp1
-LEFT JOIN CCOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
+LEFT JOIN CCIntOpenOrders temp2 on (temp2.exchangeName = temp1.exchangeName AND
 														temp2.tradePair = temp1.tradePair AND
 														FROM_UNIXTIME((UNIX_TIMESTAMP(temp2.recordTime)) +2419200) = temp1.recordTime);
 
-ALTER TABLE CCOpenOrdersWPriceDiff10 ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE CCOpenOrdersWPriceDiff10 ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
 
 select * from CCOpenOrdersWPriceDiff10 limit 12000;
 
@@ -326,10 +292,10 @@ select count(*) from CCOpenOrdersWPriceDiff10 where diff2Wk > 30;
 CREATE TABLE CCOpenOrdersOrdered (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
-	askPriceUSD FLOAT NULL,
-	askPriceBTC FLOAT NULL,
+	totalBuyAmount FLOAT NULL,
+	totalSellAmount FLOAT NULL,
 	recordTime DATETIME NULL,
-    spikeStarts TINYINT(1) DEFAULT 0,
+    
     diff2Hr FLOAT NULL,
     diff4Hr FLOAT NULL,
     diff8Hr FLOAT NULL,
@@ -345,13 +311,15 @@ CREATE TABLE CCOpenOrdersOrdered (
 INSERT into CCOpenOrdersOrdered
 select * from CCOpenOrdersWPriceDiff10 ORDER BY CONCAT(exchangeName, tradePair), recordTime;
 
+ALTER TABLE CCOpenOrdersOrdered ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
+
 CREATE TABLE CCOpenOrdersGSTracker (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
-	askPriceUSD FLOAT NULL,
-	askPriceBTC FLOAT NULL,
+	totalBuyAmount FLOAT NULL,
+	totalSellAmount FLOAT NULL,
 	recordTime DATETIME NULL,
-    spikeStarts TINYINT(1) DEFAULT 0,
+    
     diff2Hr FLOAT NULL,
     diff4Hr FLOAT NULL,
     diff8Hr FLOAT NULL,
@@ -367,7 +335,7 @@ CREATE TABLE CCOpenOrdersGSTracker (
 );
 
 INSERT into CCOpenOrdersGSTracker
-select exchangeName, tradePair, askPriceUSD, askPriceBTC, recordTime, spikeStarts, 
+select exchangeName, tradePair, totalBuyAmount, totalSellAmount, recordTime, 
 diff2Hr, diff4Hr, diff8Hr, diff16Hr, diff1Day, diff2Day, diff4Day, diff1Wk, diff2Wk, diff4Wk, 
 gsMarker, commonPtPrice from 
 (select *, 
@@ -385,23 +353,23 @@ gsMarker, commonPtPrice from
 ELSE 0
 END) as gsMarker,
 (case 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Hr >30) 	 then askPriceUSD*100/(diff2Hr + 100) 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Hr >30) 	 then askPriceUSD*100/(diff4Hr + 100)  
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff8Hr >30) 	 then askPriceUSD*100/(diff8Hr + 100) 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff16Hr >30) 	 then askPriceUSD*100/(diff16Hr + 100) 
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff1Day >30) 	 then askPriceUSD*100/(diff1Day + 100)  
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Day >30) 	 then askPriceUSD*100/(diff2Day + 100)  
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Day >30) 	 then askPriceUSD*100/(diff4Day + 100)  
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff1Wk >30) 	 then askPriceUSD*100/(diff1Wk + 100)  
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Wk >30) 	 then askPriceUSD*100/(diff2Wk + 100)  
- WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Wk >30) 	 then askPriceUSD*100/(diff4Wk + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Hr >30) 	 then totalBuyAmount*100/(diff2Hr + 100) 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Hr >30) 	 then totalBuyAmount*100/(diff4Hr + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff8Hr >30) 	 then totalBuyAmount*100/(diff8Hr + 100) 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff16Hr >30) 	 then totalBuyAmount*100/(diff16Hr + 100) 
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff1Day >30) 	 then totalBuyAmount*100/(diff1Day + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Day >30) 	 then totalBuyAmount*100/(diff2Day + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Day >30) 	 then totalBuyAmount*100/(diff4Day + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff1Wk >30) 	 then totalBuyAmount*100/(diff1Wk + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff2Wk >30) 	 then totalBuyAmount*100/(diff2Wk + 100)  
+ WHEN (@previousTradePair = CONCAT(exchangeName, tradePair)  AND diff4Wk >30) 	 then totalBuyAmount*100/(diff4Wk + 100)  
 ELSE 0
 END) as commonPtPrice,
 (@previousTradePair := CONCAT(exchangeName, tradePair)) as lastTradePair
 from CCOpenOrdersOrdered
 JOIN (select @previousTradePair := "none") t) t2;
 
-ALTER TABLE CCOpenOrdersGSTracker ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE CCOpenOrdersGSTracker ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
 
 select count(DISTINCT(CONCAT(exchangeName, tradePair))) from CCOpenOrdersGSTracker where gsMarker = 4;
 
@@ -411,10 +379,10 @@ select * from CCOpenOrdersGSTracker limit 12000;
 CREATE TABLE CCOpenOrdersGSData (
 	exchangeName VARCHAR(15) NULL,
 	tradePair VARCHAR(20) NULL,
-	askPriceUSD FLOAT NULL,
-	askPriceBTC FLOAT NULL,
+	totalBuyAmount FLOAT NULL,
+	totalSellAmount FLOAT NULL,
 	recordTime DATETIME NULL,
-    spikeStarts TINYINT(1) DEFAULT 0,
+    
     diff2Hr FLOAT NULL,
     diff4Hr FLOAT NULL,
     diff8Hr FLOAT NULL,
@@ -432,14 +400,14 @@ CREATE TABLE CCOpenOrdersGSData (
 );
 
 insert into CCOpenOrdersGSData
-select exchangeName, tradePair, askPriceUSD, askPriceBTC, recordTime, spikeStarts, 
+select exchangeName, tradePair, totalBuyAmount, totalSellAmount, recordTime, 
 diff2Hr, diff4Hr, diff8Hr, diff16Hr, diff1Day, diff2Day, diff4Day, diff1Wk, diff2Wk, diff4Wk, 
 gsMarker, commonPtPrice, diffCommonPt, gsTracker from 
 (select *,
 
 (case 
-	WHEN @previousTradePair = CONCAT(exchangeName, tradePair) AND gsMarker != 0 then @percDiffCommonPt := (askPriceUSD - commonPtPrice)/commonPtPrice*100
-    WHEN @previousTradePair = CONCAT(exchangeName, tradePair) AND @commonPtPrice != 0 then @percDiffCommonPt := (askPriceUSD - @commonPtPrice)/@commonPtPrice*100
+	WHEN @previousTradePair = CONCAT(exchangeName, tradePair) AND gsMarker != 0 then @percDiffCommonPt := (totalBuyAmount - commonPtPrice)/commonPtPrice*100
+    WHEN @previousTradePair = CONCAT(exchangeName, tradePair) AND @commonPtPrice != 0 then @percDiffCommonPt := (totalBuyAmount - @commonPtPrice)/@commonPtPrice*100
     WHEN false then @percDiffCommonPt := 0
 END ) as diffCommonPt,
 
@@ -461,7 +429,7 @@ from CCOpenOrdersGSTracker
 JOIN (select @previousTradePair := "none", @commonPtPrice :=0, @percDiffCommonPt := 0, @gsTrackerVar := 0) t
 )t2 ;
 
-ALTER TABLE CCOpenOrdersGSData ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE CCOpenOrdersGSData ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
 
 
 select * from CCOpenOrdersGSData limit 12000;
@@ -484,7 +452,7 @@ create table gsSpikeMetaData (
 );
 
 INSERT INTO gsSpikeMetaData
-select t.exchangeName, t.tradePair, t3.gsTracker, t3.gsMarker, t.gsDuration, (t3.gsMarker + t.gsDuration), t.minGSTimeC, t.maxGSTimeC, t.minSpikeTimeC, t3.askPriceUSD as minGSPrice, t4.askPriceUSD as maxGSPrice, (t4.askPriceUSD - t3.commonPtPrice)*100/t3.commonPtPrice as netPercHike, t3.commonPtPrice from 
+select t.exchangeName, t.tradePair, t3.gsTracker, t3.gsMarker, t.gsDuration, (t3.gsMarker + t.gsDuration), t.minGSTimeC, t.maxGSTimeC, t.minSpikeTimeC, t3.totalBuyAmount as minGSPrice, t4.totalBuyAmount as maxGSPrice, (t4.totalBuyAmount - t3.commonPtPrice)*100/t3.commonPtPrice as netPercHike, t3.commonPtPrice from 
 (
 select t1.exchangeName, t1.tradePair, t1.gsDuration, t1.minGSTime as minGSTimeC, t1.maxGSTime as maxGSTimeC, t2.minSpikeTime as minSpikeTimeC from 
 	(select exchangeName, tradePair, CONCAT(exchangeName, tradePair) as tp, 
@@ -510,7 +478,7 @@ select t1.exchangeName, t1.tradePair, t1.gsDuration, t1.minGSTime as minGSTimeC,
 -- and gsDuration > 6
 ;
 
-ALTER TABLE gsSpikeMetaData ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE gsSpikeMetaData ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
 select count(*) from gsSpikeMetaData;
 
 
@@ -540,9 +508,9 @@ t1.postThresholdDuration, t1.totalDuration,
 FROM_UNIXTIME((UNIX_TIMESTAMP(t1.minGSTime)) - (preThresholdDurOrGSMarker*3600)) as commonPtTime, 
 t1.minGSTime, t1.maxGSTime, t1.minSpikeTime, 
 t1.minGSPrice, t1.maxGSPrice, t1.netPercHike, t1.commonPtPrice,
-ROUND((STDDEV(t2.askPriceUSD)/AVG(t2.askPriceUSD)*100), 10) as relStdDev,
-ROUND((VARIANCE(t2.askPriceUSD)/POW(AVG(t2.askPriceUSD), 2)*100), 10) as relVariance, 
-ROUND((MAX(t2.askPriceUSD) - t1.commonPtPrice)/t1.commonPtPrice*100, 10) as commonPtPreDiff -- gs commonPtPreDiff should not be a very high positive number to ensure the commonPt of a GS is not a sharp dip
+ROUND((STDDEV(t2.totalBuyAmount)/AVG(t2.totalBuyAmount)*100), 10) as relStdDev,
+ROUND((VARIANCE(t2.totalBuyAmount)/POW(AVG(t2.totalBuyAmount), 2)*100), 10) as relVariance, 
+ROUND((MAX(t2.totalBuyAmount) - t1.commonPtPrice)/t1.commonPtPrice*100, 10) as commonPtPreDiff -- gs commonPtPreDiff should not be a very high positive number to ensure the commonPt of a GS is not a sharp dip
 from gsSpikeMetaData as t1
 LEFT JOIN CCOpenOrdersGSData as t2 ON (t2.exchangeName = t1.exchangeName AND
 																	t2.tradePair = t1.tradePair AND
@@ -553,7 +521,7 @@ LEFT JOIN CCOpenOrdersGSData as t2 ON (t2.exchangeName = t1.exchangeName AND
 group by CONCAT(t1.exchangeName, t1.tradePair, t1.gsTracker)                                                                    
 ;
 
-ALTER TABLE gsSpikeMetaData2 ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE gsSpikeMetaData2 ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
 
 
 create table gsSpikeMetaData3 (
@@ -583,7 +551,7 @@ select t1.exchangeName, t1.tradePair, t1.gsTracker, t1.preThresholdDurOrGSMarker
 t1.postThresholdDuration, t1.totalDuration, 
 t1.commonPtTime, t1.minGSTime, t1.maxGSTime, t1.minSpikeTime, 
 t1.minGSPrice, t1.maxGSPrice, t1.netPercHike, t1.commonPtPrice,
-max(t2.askPriceUSD) as maxFirst48hPrice, (max(t2.askPriceUSD)-t1.commonPtPrice)*100/t1.commonPtPrice as first48hmaxPercChange,
+max(t2.totalBuyAmount) as maxFirst48hPrice, (max(t2.totalBuyAmount)-t1.commonPtPrice)*100/t1.commonPtPrice as first48hmaxPercChange,
 t1.relStdDev1WkPreGS, t1.relVariance1WkPreGS, t1.commonPtPreDiff
 from gsSpikeMetaData2 as t1
 LEFT JOIN CCOpenOrdersGSData as t2 ON (t2.exchangeName = t1.exchangeName AND
@@ -594,7 +562,7 @@ LEFT JOIN CCOpenOrdersGSData as t2 ON (t2.exchangeName = t1.exchangeName AND
 -- where  t1.preThresholdDuration >=8 and t1.netPercHike > 25                                                                    
 group by CONCAT(t1.exchangeName, t1.tradePair, t1.gsTracker);
 
-ALTER TABLE gsSpikeMetaData3 ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE gsSpikeMetaData3 ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
 
 
 create table gsSpikeMetaData4 (
@@ -652,7 +620,7 @@ t3.commonPtTime, t3.minGSTime, t3.maxGSTime, t3.minSpikeTime,
 t3.minGSPrice, t3.maxGSPrice, t3.netPercHike, t3.commonPtPrice,
 t3.maxFirst48hPrice, t3.first48hmaxPercChange,
 t3.relStdDev1WkPreGS, t3.relVariance1WkPreGS, t3.commonPtPreDiff, 
-t3.minGSMaxBuy, t3.minGSMaxSell, max(t4.askPriceUSD) as maxPricePostGS
+t3.minGSMaxBuy, t3.minGSMaxSell, max(t4.totalBuyAmount) as maxPricePostGS
 
 from 
 (
@@ -664,7 +632,7 @@ t1.maxFirst48hPrice, t1.first48hmaxPercChange,
 t1.relStdDev1WkPreGS, t1.relVariance1WkPreGS, t1.commonPtPreDiff, 
 max(t2.totalBuyAmount) as minGSMaxBuy, max(t2.totalSellAmount) as minGSMaxSell
 from gsSpikeMetaData3 as t1
-LEFT JOIN openOrders15MinAvg as t2 ON (t2.exchangeName = t1.exchangeName AND
+LEFT JOIN CCIntOpenOrders as t2 ON (t2.exchangeName = t1.exchangeName AND
 																	t2.tradePair = t1.tradePair AND
 																	t2.recordTime >=  FROM_UNIXTIME((UNIX_TIMESTAMP(t1.minGSTime)) - 900) AND
 																	t2.recordTime <= FROM_UNIXTIME((UNIX_TIMESTAMP(t1.minGSTime)) + 900 )
@@ -681,12 +649,12 @@ group by CONCAT(t3.exchangeName, t3.tradePair, t3.gsTracker)
 ) as t5 
 LEFT JOIN CCOpenOrdersGSData as t6 ON (t6.exchangeName = t5.exchangeName AND
 																	t6.tradePair = t5.tradePair AND
-																	t6.askPriceUSD =  t5.maxPricePostGS
+																	t6.totalBuyAmount =  t5.maxPricePostGS
 																	)                                                                    
 -- where  t1.preThresholdDuration >=8 and t1.netPercHike > 25                                                                    
 group by CONCAT(t5.exchangeName, t5.tradePair, t5.gsTracker)
 ) as t7
-LEFT JOIN openOrders15MinAvg as t8 ON (t8.exchangeName = t7.exchangeName AND
+LEFT JOIN CCIntOpenOrders as t8 ON (t8.exchangeName = t7.exchangeName AND
 																	t8.tradePair = t7.tradePair AND
 																	t8.recordTime =  t7.maxPricePostGSTime
 																	)                                                                    
@@ -696,7 +664,7 @@ group by CONCAT(t7.exchangeName, t7.tradePair, t7.gsTracker)
 
 select * from gsSpikeMetaData4;
 
-ALTER TABLE gsSpikeMetaData4 ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE gsSpikeMetaData4 ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
 
 
 create table gsSpikeMetaData5 (
@@ -751,7 +719,7 @@ t7.maxPricePostGS, t7.maxPricePostGSTime,
 t7.minGSMaxBuy, t7.minGSMaxSell, t7.maxGSMaxBuy, t7.maxGSMaxSell
 from gsSpikeMetaData4 as t7;
 
-ALTER TABLE gsSpikeMetaData5 ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE gsSpikeMetaData5 ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
 
 
 create table gsSpikeMetaData6 (
@@ -803,7 +771,7 @@ LEFT JOIN
 from marketCapNVolume group by symbol) 
 as t1 ON (t1.symbol = t7.symbol) ;
 
-ALTER TABLE gsSpikeMetaData6 ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE gsSpikeMetaData6 ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
 
 
 create table gsSpikeMetaData7 (
@@ -869,13 +837,29 @@ t7.marketCapUSD, min(t1.recordTime) as minTime95Perc, max(t1.recordTime) as maxT
 from gsSpikeMetaData6 as t7
 LEFT JOIN CCOpenOrdersGSData as t1 ON (t1.exchangeName = t7.exchangeName AND
 																	t1.tradePair = t7.tradePair AND
-                                                                    t1.askPriceUSD >= (1.95*t7.commonPtPrice) AND
+                                                                    t1.totalBuyAmount >= (1.95*t7.commonPtPrice) AND
                                                                     t1.recordTime <= t7.maxGSTime AND
                                                                     t1.recordTime >= t7.minGSTime)
 group by t7.exchangeName, t7.tradePair, t7.gsTracker) t
 ;
 
 
-ALTER TABLE gsSpikeMetaData7 ADD INDEX exchangePair (exchangeName, tradePair);
+ALTER TABLE gsSpikeMetaData7 ADD INDEX exchangePair (exchangeName, tradePair, recordTime);
 
 use pocu4;
+
+
+--
+
+select count(*) from
+(select t1.exchangeName, t1.tradePair, t1.totalBuyAmount, t1.totalSellAmount,  t1.recordTime  from 
+openOrders15MinAvg t1
+LEFT JOIN 
+(select exchangeName, tradePair, min(totalBuyAmount) as minBuyAmount from openOrders15MinAvg
+group by exchangeName, tradePair) t2 ON (t2.exchangeName = t1.exchangeName AND
+																		t2.tradePair = t1.tradePair)
+where (t1.totalBuyAmount - t2.minBuyAmount)*100/t2.minBuyAmount > 100
+) t
+;
+
+select count(*) from openOrders15MinAvg;
