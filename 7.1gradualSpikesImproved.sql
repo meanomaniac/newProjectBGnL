@@ -1527,7 +1527,7 @@ LEFT JOIN CCOpenOrdersGSData t2 ON (t2.exchangeName = t1.exchangeName AND
 where t1.netPercHike >=100 and (t1.maxGSMaxBuy > 14 or  t1.minGSMaxBuy > 14) 
 -- and t1.minGSLastHourPercChange < 24
 and t1.symbol != 'BTC'  and t1.preThresholdDurOrGSMarker > 8  
-and t1.minGSRelDiff < -8
+and t1.minGSRelDiff <= 0
 and t1.preMinGS3HrPercChange < 22
 -- and t1.preThresholdDurOrGSMarker <= 168
 -- and t1.commonPtPreDiff < 25
@@ -1545,17 +1545,17 @@ LEFT JOIN CCOpenOrdersGSData t2 ON (t2.exchangeName = t1.exchangeName AND
 where t1.netPercHike <=35 and (t1.maxGSMaxBuy > 14 or  t1.minGSMaxBuy > 14) 
 -- and t1.minGSLastHourPercChange < 24
 and t1.symbol != 'BTC'  and t1.preThresholdDurOrGSMarker > 8 
-and t1.minGSRelDiff < -8
+and t1.minGSRelDiff <= 0
 and t1.preMinGS3HrPercChange < 22
+and t1.percDiffMaxB4PreMinGS <=0
 -- and t1.preThresholdDurOrGSMarker <= 168
 -- and t1.minGSTime < t1.minSpikeTime
 -- and t1.commonPtPreDiff < 25
-and t1.percDiffMaxB4PreMinGS <=0
 and CONCAT(t1.exchangeName, t1.tradePair) not in 
 (select CONCAT(exchangeName, tradePair) from gsSpikeMetaDataNew11
-where netPercHike >=100 and (maxGSMaxBuy > 14 or  minGSMaxBuy > 14) 
+where netPercHike >=35 and (maxGSMaxBuy > 14 or  minGSMaxBuy > 14) 
 and symbol != 'BTC'  and preThresholdDurOrGSMarker > 8
-and minGSRelDiff < -8
+and minGSRelDiff <=0
 and t1.preMinGS3HrPercChange < 22
 and t1.percDiffMaxB4PreMinGS <=0
 -- and t1.preThresholdDurOrGSMarker <= 168
