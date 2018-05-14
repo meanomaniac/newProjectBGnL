@@ -848,7 +848,7 @@ ALTER TABLE gsSpikeMetaData7 ADD INDEX exchangePair (exchangeName, tradePair, re
 
 use pocu4;
 
-
+select * from gsSpikeMetaData7 where CONCAT(exchangeName, tradePair) = 'bittrexBTC-TX';
 --
 
 select count(*) from
